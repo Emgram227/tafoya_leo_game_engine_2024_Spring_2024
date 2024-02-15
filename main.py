@@ -46,6 +46,8 @@ class Game:
     def new(self):
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
+        self.coins = pg.sprite.Group()
+        self.bushes = pg.sprite.Group()
         for row, tiles in enumerate(self.map_data):
             print(row)
             for col, tile in enumerate(tiles):
@@ -55,6 +57,10 @@ class Game:
                     Wall(self, col, row)
                 if tile == 'P':
                     self.player1 = Player(self, col, row)
+                if tile == 'C':
+                    Coin(self,col,row)
+                if tile == 'B':
+                    Bush(self,col,row)
 
     def run(self):
         # creates "while" loop that triggers when running = true
