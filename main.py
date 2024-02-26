@@ -48,6 +48,7 @@ class Game:
         self.walls = pg.sprite.Group()
         self.coins = pg.sprite.Group()
         self.bushes = pg.sprite.Group()
+        self.power_ups = pg.sprite.Group()
         for row, tiles in enumerate(self.map_data):
             print(row)
             for col, tile in enumerate(tiles):
@@ -94,7 +95,12 @@ class Game:
             if event.type == pg.QUIT:
                 self.quit()
             if event.type == pg.KEYDOWN:
-                pass
+                if event.key == pg.K_r:
+                    self.player1.image.fill(RED)
+                if event.key == pg.K_g:
+                    self.player1.image.fill(GREEN)
+                if event.key == pg.K_b:
+                    self.player1.image.fill(BLUE)
             # if event.type == pg.KEYDOWN:
             #     if event.key == pg.K_LEFT:
             #         self.player1.move(dx=-1)
