@@ -62,6 +62,8 @@ class Game:
                     Coin(self,col,row)
                 if tile == 'B':
                     Bush(self,col,row)
+                if tile == 'U':
+                    PowerUp(self,col,row)
 
     def run(self):
         # creates "while" loop that triggers when running = true
