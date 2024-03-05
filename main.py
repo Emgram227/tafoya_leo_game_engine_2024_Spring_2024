@@ -49,6 +49,8 @@ class Game:
         self.coins = pg.sprite.Group()
         self.bushes = pg.sprite.Group()
         self.power_ups = pg.sprite.Group()
+        self.keys = pg.sprite.Group()
+        self.doors = pg.sprite.Group()
         for row, tiles in enumerate(self.map_data):
             print(row)
             for col, tile in enumerate(tiles):
@@ -64,6 +66,10 @@ class Game:
                     Bush(self,col,row)
                 if tile == 'U':
                     PowerUp(self,col,row)
+                if tile == 'K':
+                    Key(self,col,row)
+                if tile == 'D':
+                    Door(self,col,row)
 
     def run(self):
         # creates "while" loop that triggers when running = true
@@ -136,5 +142,3 @@ while True:
     g.new()
     g.run()
     #g.show_start_screen()
- 
-

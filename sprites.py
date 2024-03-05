@@ -16,6 +16,7 @@ class Player(pg.sprite.Sprite):
         self.vx, self.vy = 0, 0
         self.x = x * TILESIZE
         self.y = y * TILESIZE
+        self.doorkey = DOOR_KEY
         self.moneybag = 0
         self.speed = 300
 
@@ -69,7 +70,8 @@ class Player(pg.sprite.Sprite):
                  self.speed *= 2
                  print("PowerUp")
                  print(hits[0].__class__.__name__)
-                
+            if str(hits[0].__class__.__name__) == "Key":    
+                self.keycount = True
         
         
 
@@ -97,6 +99,9 @@ class Player(pg.sprite.Sprite):
             pass
         if self.collide_with_group(self.game.coins, True):
             self.moneybag += 1
+        if self.collide_with_group(self.game.keys, True):
+            self.keycount = True
+
 
 class Wall(pg.sprite.Sprite):
     def __init__ (self,game,x,y):
@@ -144,6 +149,36 @@ class Bush(pg.sprite.Sprite):
         self.game = game
         self.image = pg.Surface((TILESIZE,TILESIZE))
         self.image.fill(GREEN)
+        self.rect = self.image.get_rect()
+        self.x = x
+        self.y = y 
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
+
+class Door(pg.sprite.Sprite):
+    def __init__ (self,game,x,y):
+        self.groups = game.all_sprites
+        if DOOR_KEY == False:
+            game.walls
+        else:
+            game.doors
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE,TILESIZE))
+        self.image.fill(BROWN)
+        self.rect = self.image.get_rect()
+        self.x = x
+        self.y = y 
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
+    
+class Key(pg.sprite.Sprite):
+    def __init__ (self,game,x,y):
+        self.groups = game.all_sprites, game.keys
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE,TILESIZE))
+        self.image.fill(ORANGE)
         self.rect = self.image.get_rect()
         self.x = x
         self.y = y 
