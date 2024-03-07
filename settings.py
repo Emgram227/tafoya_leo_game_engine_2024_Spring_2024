@@ -19,4 +19,5 @@ BROWN = (75,75,0)
 ORANGE = (255,100,0)
 
 PLAYER_SPEED = 300
-DOOR_KEY =  False
+global doorKey
+doorKey = False
