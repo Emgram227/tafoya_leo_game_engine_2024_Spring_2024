@@ -39,6 +39,8 @@ class Player(pg.sprite.Sprite):
     #     self.x += dx
     #     self.y += dy
         
+    
+
     def collide_with_walls(self, dir):
         if dir == 'x':
            hits = pg.sprite.spritecollide(self, self.game.walls, False)
@@ -60,7 +62,7 @@ class Player(pg.sprite.Sprite):
                self.rect.y= self.y
     
     # made possible by Aayush's question!
-    def collide_with_group(self,group, kill):
+    def collide_with_group(self,group,kill):
         hits = pg.sprite.spritecollide(self, group, kill)
         if hits:
             if str(hits[0].__class__.__name__) == "Coin":
@@ -70,22 +72,23 @@ class Player(pg.sprite.Sprite):
                  self.speed *= 2
                  print("PowerUp")
                  print(hits[0].__class__.__name__)
+                 powerUp = True
             if str(hits[0].__class__.__name__) == "Key":    
                 doorKey = True
                 print(doorKey)
-        
-        
+            if str(hits[0].__class__.__name__) == "Door":   
+                if doorKey == True:
+                    pass
+            if str(hits[0].__class__.__name__) == "Mobs":
+                if powerUp == True:
+                    pass
 
-   
     def update(self):
         self.rect.y = self.y
-        # add collision later
+         # add collision later
         self.collide_with_walls('y')
         self.collide_with_group(self.game.coins, True)
 
-    
-
-    def update(self):
         self.get_keys()
         self.x += self.vx * self.game.dt
         self.y += self.vy * self.game.dt
@@ -96,12 +99,20 @@ class Player(pg.sprite.Sprite):
         self.rect.y = self.y 
         # add collision later
         self.collide_with_walls('y')
+        if self.doorkey == True:
+            
+            self.collide_with_group(self.game.doors, True)
+        if powerUp == True:
+            print ("WORKING")
+            self.collide_with_group(self.game.mobs, True)
+        
         if self.collide_with_group(self.game.power_ups, True):
             pass
         if self.collide_with_group(self.game.coins, True):
             self.moneybag += 1
         if self.collide_with_group(self.game.keys, True):
              doorKey = True
+
 
 
 class Wall(pg.sprite.Sprite):
@@ -158,10 +169,7 @@ class Bush(pg.sprite.Sprite):
 
 class Door(pg.sprite.Sprite):
     def __init__ (self,game,x,y):
-        if doorKey == False:
-            self.groups = game.all_sprites,game.walls
-        if doorKey == True:
-           self.groups = game.all_sprites,game.doors
+        self.groups = game.all_sprites,game.walls
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.image = pg.Surface((TILESIZE,TILESIZE))
@@ -184,3 +192,50 @@ class Key(pg.sprite.Sprite):
         self.y = y 
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
+    
+vec = pg.math.Vector2
+class Mob(pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.groups = game.all_sprites, game.mobs
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE, TILESIZE))
+        self.image.fill(RED)
+        self.rect = self.image.get_rect()
+        self.x = x
+        self.y = y
+        self.vx, self.vy = 100, 100
+        self.x = x * TILESIZE
+        self.y = y * TILESIZE
+        self.speed = 1
+    def collide_with_walls(self, dir):
+        if dir == 'x':
+            # print('colliding on the x')
+            hits = pg.sprite.spritecollide(self, self.game.walls, False)
+            if hits:
+                self.vx *= -1
+                self.rect.x = self.x
+        if dir == 'y':
+            # print('colliding on the y')
+            hits = pg.sprite.spritecollide(self, self.game.walls, False)
+            if hits:
+                self.vy *= -1
+                self.rect.y = self.y
+    def update(self):
+        # self.rect.x += 1
+        self.x += self.vx * self.game.dt
+        self.y += self.vy * self.game.dt
+        
+        if self.rect.x < self.game.player1.rect.x:
+            self.vx = 100
+        if self.rect.x > self.game.player1.rect.x:
+            self.vx = -100    
+        if self.rect.y < self.game.player1.rect.y:
+            self.vy = 100
+        if self.rect.y > self.game.player1.rect.y:
+            self.vy = -100
+        self.rect.x = self.x
+        self.collide_with_walls('x')
+        self.rect.y = self.y
+        self.collide_with_walls('y')
+

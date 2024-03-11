@@ -51,6 +51,7 @@ class Game:
         self.power_ups = pg.sprite.Group()
         self.keys = pg.sprite.Group()
         self.doors = pg.sprite.Group()
+        self.mobs = pg.sprite.Group()
         for row, tiles in enumerate(self.map_data):
             print(row)
             for col, tile in enumerate(tiles):
@@ -70,6 +71,9 @@ class Game:
                     Key(self,col,row)
                 if tile == 'D':
                     Door(self,col,row)
+                if tile == 'M':
+                    Mob(self,col,row)
+              
 
     def run(self):
         # creates "while" loop that triggers when running = true

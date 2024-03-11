@@ -21,3 +21,6 @@ ORANGE = (255,100,0)
 PLAYER_SPEED = 300
 global doorKey
 doorKey = False
+
+global powerUp 
+powerUp = False
