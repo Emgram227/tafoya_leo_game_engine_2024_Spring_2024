@@ -19,8 +19,12 @@ BROWN = (75,75,0)
 ORANGE = (255,100,0)
 
 PLAYER_SPEED = 300
+
 global doorKey
 doorKey = False
 
-global powerUp 
+global powerUp
 powerUp = False
+
+global hiding
+hiding = False
