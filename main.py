@@ -1,6 +1,7 @@
 # This file was created by: Leo Tafoya
 
 #import everything 
+from utils import *
 import pygame as pg
 from settings import *
 from sprites import *
@@ -44,6 +45,7 @@ class Game:
                 self.map_data.append(line)
     # runs the game
     def new(self):
+        self.mob_timer = 5
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
         self.coins = pg.sprite.Group()
@@ -52,12 +54,13 @@ class Game:
         self.keys = pg.sprite.Group()
         self.doors = pg.sprite.Group()
         self.mobs = pg.sprite.Group()
+        self.mobspawner = pg.sprite.Group()
+        self.cooldown = Timer(self)
         for row, tiles in enumerate(self.map_data):
             print(row)
             for col, tile in enumerate(tiles):
                 print(col)
                 if tile == '1':
-                    print("a wall at", row, col)
                     Wall(self,col,row)
                 if tile == 'P':
                     self.player1 = Player(self, col, row)
@@ -72,7 +75,13 @@ class Game:
                 if tile == 'D':
                     Door(self,col,row)
                 if tile == 'M':
-                    Mob(self,col,row)
+                    MobSpawner(self,col,row)
+                    if self.cooldown.cd < 1:
+                        self.cooling = False
+                    if not self.cooling:
+                           print ("Working")
+                           if tile == 'M':
+                                Mob(self,col,row)                 
               
 
     def run(self):
@@ -88,7 +97,17 @@ class Game:
         sys.exit()
 
     def update(self):
+        
+        self.cooldown.ticking()
         self.all_sprites.update()
+        if self.mob_timer.cd < 1:
+            for row, tiles in enumerate(self.map_data):
+                for col, tile in enumerate(tiles):
+                    if tile == 'M':
+                        Mob(self,col,row)
+                        self.mob_timer.cd = 5
+        
+        
 
     def draw_grid(self):
         for x in range(0, WIDTH, TILESIZE):
@@ -157,6 +176,7 @@ class Game:
                     self.quit()
                 if event.type == pg.KEYUP:
                     waiting = False
+    
 
 
     

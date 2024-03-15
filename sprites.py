@@ -82,7 +82,8 @@ class Player(pg.sprite.Sprite):
                 print(self.doorkey)
             if str(hits[0].__class__.__name__) == "Bush":
                 hiding = True
-                pass
+                print (hiding)
+
             if str(hits[0].__class__.__name__) == "Door":   
                 if self.doorkey == True:
                     kill
@@ -91,6 +92,11 @@ class Player(pg.sprite.Sprite):
                 if self.powerup == True:
                     self.health += 1
                     kill
+            if str(hits[0].__class__.__name__) == "MobSpawner":
+                if self.powerup == True:
+                    self.health += 10
+                    kill
+
 
     def update(self):
         self.rect.y = self.y
@@ -118,6 +124,8 @@ class Player(pg.sprite.Sprite):
             self.collide_with_group(self.game.doors, True)
         if self.powerup == True:
             self.collide_with_group(self.game.mobs, True)
+        if self.powerup == True:
+            self.collide_with_group(self.game.mobspawner, True)
     
 
 
@@ -248,4 +256,16 @@ class Mob(pg.sprite.Sprite):
             self.rect.y = self.y
             self.collide_with_walls('y')
 
-# here's the healthbar
+class MobSpawner(pg.sprite.Sprite):
+    def __init__ (self,game,x,y):
+        self.groups = game.all_sprites, game.mobspawner
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE,TILESIZE))
+        self.image.fill(BLUE)
+        self.rect = self.image.get_rect()
+        self.x = x
+        self.y = y 
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
+
