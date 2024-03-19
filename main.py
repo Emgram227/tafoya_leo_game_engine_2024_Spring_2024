@@ -45,17 +45,18 @@ class Game:
                 self.map_data.append(line)
     # runs the game
     def new(self):
-        self.mob_timer = 5
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
         self.coins = pg.sprite.Group()
         self.bushes = pg.sprite.Group()
         self.power_ups = pg.sprite.Group()
         self.keys = pg.sprite.Group()
-        self.doors = pg.sprite.Group()
+        self.chests = pg.sprite.Group()
         self.mobs = pg.sprite.Group()
         self.mobspawner = pg.sprite.Group()
+        self.mob_timer = Timer(self)
         self.cooldown = Timer(self)
+        self.mob_timer.cd = 5 
         for row, tiles in enumerate(self.map_data):
             print(row)
             for col, tile in enumerate(tiles):
@@ -73,7 +74,7 @@ class Game:
                 if tile == 'K':
                     Key(self,col,row)
                 if tile == 'D':
-                    Door(self,col,row)
+                    Chest(self,col,row)
                 if tile == 'M':
                     MobSpawner(self,col,row)
                     if self.cooldown.cd < 1:
@@ -96,16 +97,17 @@ class Game:
         pg.quit()
         sys.exit()
 
-    def update(self):
-        
+    def update(self): 
         self.cooldown.ticking()
+        self.mob_timer.ticking()
         self.all_sprites.update()
         if self.mob_timer.cd < 1:
+            self.mob_timer.cd = 5
             for row, tiles in enumerate(self.map_data):
                 for col, tile in enumerate(tiles):
                     if tile == 'M':
                         Mob(self,col,row)
-                        self.mob_timer.cd = 5
+                        
         
         
 
@@ -114,12 +116,6 @@ class Game:
             pg.draw.line(self.screen, LIGHTGREY, (x,0) , (x,HEIGHT))
         for y in range(0, WIDTH, TILESIZE):
             pg.draw.line(self.screen, LIGHTGREY, (0,y) , (WIDTH, y))
-
-    def draw(self):
-            self.screen.fill(BGCOLOR)
-            self.draw_grid()
-            self.all_sprites.draw(self.screen)
-            pg.display.flip()
     
     def draw_text(self,surface,text,size,color,x,y):
         font_name = pg.font.match_font('arial')
@@ -129,9 +125,25 @@ class Game:
         text_rect.topleft = (x,y)
         surface.blit(text_surface,text_rect)
 
+
+    def draw(self):
+            self.screen.fill(BGCOLOR)
+            self.draw_grid()
+            self.all_sprites.draw(self.screen)
+            self.draw_text(self.screen, "Time until next spawn", 24, WHITE, WIDTH/3.5 - 32, 2)
+            self.draw_text(self.screen, str(self.mob_timer.get_countdown()), 24, WHITE, WIDTH/2 - 32, 2)
+            self.draw_text(self.screen, "Health", 24, WHITE, WIDTH/2.5 - 32, 30)
+            self.draw_text(self.screen, str(self.player1.hitpoints), 24, WHITE, WIDTH/2 - 32, 30)
+            self.draw_text(self.screen, "Money", 24, WHITE, WIDTH/2.5 - 32, 60)
+            self.draw_text(self.screen, str(self.player1.moneybag), 24, WHITE, WIDTH/2 - 32, 60)
+            pg.display.flip()
+    
+
     def events(self):
         for event in pg.event.get():
             if event.type == pg.QUIT:
+                self.quit()
+            if self.player1.hitpoints < 0:
                 self.quit()
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_r:
@@ -140,6 +152,9 @@ class Game:
                     self.player1.image.fill(GREEN)
                 if event.key == pg.K_b:
                     self.player1.image.fill(BLUE)
+                if event.key == pg.K_ESCAPE:
+                    self.quit()
+
             # if event.type == pg.KEYDOWN:
             #     if event.key == pg.K_LEFT:
             #         self.player1.move(dx=-1)
@@ -161,10 +176,11 @@ class Game:
             #         self.player1.image.fill == (RED)
             #         pass
     def show_start_screen(self):
-        self.screen.fill(BGCOLOR)
-        self.draw_text(self.screen,"this is the start screen",24 ,WHITE, WIDTH/2-32, 2)
+        self.screen.fill(BLUE)
+        self.draw_text(self.screen,"this is the start screen",100 ,WHITE, WIDTH/6, HEIGHT/2-32)
         pg.display.flip()
         self.wait_for_key()
+
 
     def wait_for_key(self):
         waiting = True
@@ -176,6 +192,8 @@ class Game:
                     self.quit()
                 if event.type == pg.KEYUP:
                     waiting = False
+            
+
     
 
 
@@ -188,4 +206,7 @@ g.show_start_screen()
 while True:
     g.new()
     g.run()
+
+          
     #g.show_start_screen()
+

@@ -2,6 +2,7 @@
 # this code was inspired by Zelda and informed by Chris Bradfield
 import pygame as pg
 from settings import *
+from utils import *
 
 
 class Player(pg.sprite.Sprite):
@@ -21,7 +22,9 @@ class Player(pg.sprite.Sprite):
         self.hiding = hiding
         self.moneybag = 0
         self.speed = 300
-        self.health = 100
+        self.hitpoints = 100
+        self.cooldown = Timer(self)   
+        self.test = True    
 
     def get_keys(self):
         self.vx, self.vy = 0, 0
@@ -73,29 +76,34 @@ class Player(pg.sprite.Sprite):
             if str(hits[0].__class__.__name__) == "PowerUp":
                  self.image.fill(WHITE)
                  self.speed *= 2
-                 self.health = 100
+                 self.hitpoints = 100
                  print("PowerUp")
                  print(hits[0].__class__.__name__)
                  self.powerup = True
+             
+                        
+                                        
+              
             if str(hits[0].__class__.__name__) == "Key":    
                 self.doorkey = True
                 print(self.doorkey)
             if str(hits[0].__class__.__name__) == "Bush":
-                hiding = True
-                print (hiding)
-
-            if str(hits[0].__class__.__name__) == "Door":   
+                self.hiding = True
+                print(self.hiding)
+            if str(hits[0].__class__.__name__) == "Chest":   
                 if self.doorkey == True:
+                    self.doorkey == False
+                    self.moneybag += 10
                     kill
-            if str(hits[0].__class__.__name__) == "Mobs":
-                self.health += -1
-                if self.powerup == True:
-                    self.health += 1
-                    kill
-            if str(hits[0].__class__.__name__) == "MobSpawner":
-                if self.powerup == True:
-                    self.health += 10
-                    kill
+            if str(hits[0].__class__.__name__) == "Mob":
+                    print ("hit")
+                    self.hitpoints -= 1
+                    if self.powerup == True:
+                        self.hitpoints += 1
+                        self.moneybag += 1
+                        kill
+            
+           
 
 
     def update(self):
@@ -115,17 +123,24 @@ class Player(pg.sprite.Sprite):
         self.rect.y = self.y 
         # add collision later
         self.collide_with_walls('y')
-      
+        if self.cooldown.cd < 1:
+                self.cooling = False
+                if not self.cooling:
+                    self.collide_with_group(self.game.power_ups, True)
+        self.collide_with_group(self.game.mobs, False)
+            
         if self.collide_with_group(self.game.power_ups, True):
             powerUp = True
         if self.collide_with_group(self.game.keys, True):
             doorKey = True
         if self.doorkey == True:
-            self.collide_with_group(self.game.doors, True)
+            self.collide_with_group(self.game.chests, True)
+            if self.collide_with_group(self.game.chests, True):
+                self.moneybag += 20
         if self.powerup == True:
             self.collide_with_group(self.game.mobs, True)
-        if self.powerup == True:
-            self.collide_with_group(self.game.mobspawner, True)
+            
+        
     
 
 
@@ -182,9 +197,9 @@ class Bush(pg.sprite.Sprite):
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
 
-class Door(pg.sprite.Sprite):
+class Chest(pg.sprite.Sprite):
     def __init__ (self,game,x,y):
-        self.groups = game.all_sprites, game.doors, game.walls
+        self.groups = game.all_sprites, game.chests
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.image = pg.Surface((TILESIZE,TILESIZE))
@@ -223,20 +238,22 @@ class Mob(pg.sprite.Sprite):
         self.x = x * TILESIZE
         self.y = y * TILESIZE
         self.speed = 1
+        self.hiding = hiding
 
     def collide_with_walls(self, dir):
-        if dir == 'x':
-            # print('colliding on the x')
-            hits = pg.sprite.spritecollide(self, self.game.walls, False)
-            if hits:
-                self.vx *= -1
-                self.rect.x = self.x
-        if dir == 'y':
-            # print('colliding on the y')
-            hits = pg.sprite.spritecollide(self, self.game.walls, False)
-            if hits:
-                self.vy *= -1
-                self.rect.y = self.y
+        if self.hiding == False:
+            if dir == 'x':
+                # print('colliding on the x')
+                hits = pg.sprite.spritecollide(self, self.game.walls, False)
+                if hits:
+                    self.vx *= -1
+                    self.rect.x = self.x
+            if dir == 'y':
+                # print('colliding on the y')
+                hits = pg.sprite.spritecollide(self, self.game.walls, False)
+                if hits:
+                    self.vy *= -1
+                    self.rect.y = self.y
     def update(self):
         if hiding == False:
             # self.rect.x += 1
