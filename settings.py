@@ -1,4 +1,5 @@
 #this file was created by Leo Tafoya
+import pygame as pg
 WIDTH = 1024
 HEIGHT = 768
 
@@ -17,6 +18,8 @@ BGCOLOR= (0,0,0)
 PURPLE = (255,0,255)
 BROWN = (75,75,0)
 ORANGE = (255,100,0)
+
+MOB_HIT_RECT = pg.Rect(0,0,96,96)
 
 PLAYER_SPEED = 300
 

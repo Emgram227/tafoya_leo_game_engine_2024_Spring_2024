@@ -23,8 +23,9 @@ class Player(pg.sprite.Sprite):
         self.moneybag = 0
         self.speed = 300
         self.hitpoints = 100
-        self.cooldown = Timer(self)   
-        self.test = True    
+        self.cooldown = Timer(self)
+
+        self.test = True
 
     def get_keys(self):
         self.vx, self.vy = 0, 0
@@ -80,16 +81,13 @@ class Player(pg.sprite.Sprite):
                  print("PowerUp")
                  print(hits[0].__class__.__name__)
                  self.powerup = True
-             
-                        
-                                        
-              
             if str(hits[0].__class__.__name__) == "Key":    
                 self.doorkey = True
                 print(self.doorkey)
             if str(hits[0].__class__.__name__) == "Bush":
-                self.hiding = True
+                hiding = True
                 print(self.hiding)
+            
             if str(hits[0].__class__.__name__) == "Chest":   
                 if self.doorkey == True:
                     self.doorkey == False
@@ -123,6 +121,7 @@ class Player(pg.sprite.Sprite):
         self.rect.y = self.y 
         # add collision later
         self.collide_with_walls('y')
+        self.collide_with_group(self.game.bushes, False)
         if self.cooldown.cd < 1:
                 self.cooling = False
                 if not self.cooling:
@@ -241,7 +240,6 @@ class Mob(pg.sprite.Sprite):
         self.hiding = hiding
 
     def collide_with_walls(self, dir):
-        if self.hiding == False:
             if dir == 'x':
                 # print('colliding on the x')
                 hits = pg.sprite.spritecollide(self, self.game.walls, False)
@@ -255,19 +253,30 @@ class Mob(pg.sprite.Sprite):
                     self.vy *= -1
                     self.rect.y = self.y
     def update(self):
-        if hiding == False:
             # self.rect.x += 1
             self.x += self.vx * self.game.dt
             self.y += self.vy * self.game.dt
             
             if self.rect.x < self.game.player1.rect.x:
-                self.vx = 100
+                if self.hiding == True:
+                    self.vx = 0
+                else:
+                    self.vx = 100
             if self.rect.x > self.game.player1.rect.x:
-                self.vx = -100    
+                 if self.hiding == True:
+                    self.vx = 0
+                 else:
+                    self.vx = -100
             if self.rect.y < self.game.player1.rect.y:
-                self.vy = 100
+                 if self.hiding == True:
+                    self.vy = 0
+                 else:
+                    self.vy = 100
             if self.rect.y > self.game.player1.rect.y:
-                self.vy = -100
+                 if self.hiding == True:
+                    self.vy = 0
+                 else:
+                    self.vy = -100
             self.rect.x = self.x
             self.collide_with_walls('x')
             self.rect.y = self.y
@@ -286,3 +295,65 @@ class MobSpawner(pg.sprite.Sprite):
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
 
+class Mob2(pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.groups = game.all_sprites, game.mobs
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        # self.image = game.mob_img
+        # self.image = pg.Surface((TILESIZE, TILESIZE))
+        # self.image.fill(ORANGE)
+        self.image = pg.Surface((TILESIZE,TILESIZE))
+        self.image.fill(BLUE)
+        self.rect = self.image.get_rect()
+        self.hit_rect = MOB_HIT_RECT.copy()
+        self.hit_rect.center = self.rect.center
+        self.pos = vec(x, y) * TILESIZE
+        self.vel = vec(0, 0)
+        self.acc = vec(0, 0)
+        self.rect.center = self.pos
+        self.rot = 0
+        self.chase_distance = 500
+        # added
+        self.speed = 100
+        self.chasing = True
+        # self.health = MOB_HEALTH
+        self.hitpoints = 100
+    def sensor(self):
+        if abs(self.rect.x - self.game.player1.rect.x) < self.chase_distance and abs(self.rect.y - self.game.player1.rect.y) < self.chase_distance:
+            self.chasing = True
+        else:
+            self.chasing = False
+    def collide_with_walls(self, dir):
+            if dir == 'x':
+                # print('colliding on the x')
+                hits = pg.sprite.spritecollide(self, self.game.walls, False)
+                if hits:
+                    self.vx *= -1
+                    self.rect.x = self.x
+            if dir == 'y':
+                # print('colliding on the y')
+                hits = pg.sprite.spritecollide(self, self.game.walls, False)
+                if hits:
+                    self.vy *= -1
+                    self.rect.y = self.y
+    def update(self):
+        if self.hitpoints <= 0:
+            self.kill()
+        # self.sensor()
+        if self.chasing:
+            self.rot = (self.game.player1.rect.center - self.pos).angle_to(vec(1, 0))
+            
+            self.rect = self.image.get_rect()
+            self.rect.center = self.pos
+            self.acc = vec(self.speed, 0).rotate(-self.rot)
+            self.acc += self.vel * -1
+            self.vel += self.acc * self.game.dt
+            # equation of motion
+            self.pos += self.vel * self.game.dt + 0.5 * self.acc * self.game.dt ** 2
+            # hit_rect used to account for adjusting the square collision when image rotates
+            self.hit_rect.centerx = self.pos.x
+            collide_with_walls(self, self.game.walls, 'x')
+            self.hit_rect.centery = self.pos.y
+            collide_with_walls(self, self.game.walls, 'y')
+            self.rect.center = self.hit_rect.center

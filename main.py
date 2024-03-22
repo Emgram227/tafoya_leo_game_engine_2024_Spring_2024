@@ -56,7 +56,8 @@ class Game:
         self.mobspawner = pg.sprite.Group()
         self.mob_timer = Timer(self)
         self.cooldown = Timer(self)
-        self.mob_timer.cd = 5 
+        self.round_number = 1
+        self.mob_timer.cd = 10 
         for row, tiles in enumerate(self.map_data):
             print(row)
             for col, tile in enumerate(tiles):
@@ -102,11 +103,12 @@ class Game:
         self.mob_timer.ticking()
         self.all_sprites.update()
         if self.mob_timer.cd < 1:
-            self.mob_timer.cd = 5
+            self.mob_timer.cd = 10
+            self.round_number += 1 
             for row, tiles in enumerate(self.map_data):
                 for col, tile in enumerate(tiles):
                     if tile == 'M':
-                        Mob(self,col,row)
+                        Mob2(self,col,row)
                         
         
         
@@ -130,8 +132,8 @@ class Game:
             self.screen.fill(BGCOLOR)
             self.draw_grid()
             self.all_sprites.draw(self.screen)
-            self.draw_text(self.screen, "Time until next spawn", 24, WHITE, WIDTH/3.5 - 32, 2)
-            self.draw_text(self.screen, str(self.mob_timer.get_countdown()), 24, WHITE, WIDTH/2 - 32, 2)
+            self.draw_text(self.screen, "Round", 24, WHITE, WIDTH/2.3 - 32, 2)
+            self.draw_text(self.screen, str(self.round_number), 24, WHITE, WIDTH/2 - 32, 2)
             self.draw_text(self.screen, "Health", 24, WHITE, WIDTH/2.5 - 32, 30)
             self.draw_text(self.screen, str(self.player1.hitpoints), 24, WHITE, WIDTH/2 - 32, 30)
             self.draw_text(self.screen, "Money", 24, WHITE, WIDTH/2.5 - 32, 60)
