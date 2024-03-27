@@ -83,7 +83,7 @@ class Game:
                     if not self.cooling:
                            print ("Working")
                            if tile == 'M':
-                                Mob(self,col,row)                 
+                                Mob2(self,col,row)                 
               
 
     def run(self):
@@ -99,6 +99,7 @@ class Game:
         sys.exit()
 
     def update(self): 
+        moblist = [Mob2, Mob, Ghost]
         self.cooldown.ticking()
         self.mob_timer.ticking()
         self.all_sprites.update()

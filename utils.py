@@ -1,6 +1,6 @@
 from math import floor
-
 import pygame as pg
+from settings import *
 
 class Timer():
     # sets all properties to zero when instantiated...
@@ -50,3 +50,20 @@ def collide_with_walls(sprite, group, dir):
                 sprite.pos.y = hits[0].rect.bottom + sprite.hit_rect.height / 2
             sprite.vel.y = 0
             sprite.hit_rect.centery = sprite.pos.y
+
+# import time 
+
+# frames = ["Frame"] 
+
+# last_update = 0 
+# frameNumber = 0
+
+# while True:
+#     now = pg.time.get_ticks()
+#     if now - last_update > 350:
+#         last_update = now
+#         print(now)
+#     for i in frames:
+#         time.sleep(1)
+#         frameNumber += 1
+#         print(i,frameNumber)
