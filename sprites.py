@@ -3,7 +3,11 @@
 import pygame as pg
 from settings import *
 from utils import *
+from os import path
 
+
+game_folder = path.dirname(__file__)
+img_folder = path.join(game_folder, 'images')
 
 class Player(pg.sprite.Sprite):
     def __init__ (self,game,x,y):
@@ -12,7 +16,9 @@ class Player(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self,self.groups)
         self.game = game
         self.image = pg.Surface((TILESIZE, TILESIZE))
-        self.image.fill(GREEN)
+        self.spritesheet = Spritesheet(path.join(img_folder, 'player_image.png'))
+        self.load_images()
+        
         self.rect = self.image.get_rect()
         self.vx, self.vy = 0, 0
         self.x = x * TILESIZE
@@ -85,8 +91,8 @@ class Player(pg.sprite.Sprite):
                 self.doorkey = True
                 print(self.doorkey)
             if str(hits[0].__class__.__name__) == "Bush":
-                self.hiding = True
-                print(self.hiding)
+                hiding = True
+                print(hiding)
             
             if str(hits[0].__class__.__name__) == "Chest":   
                 if self.doorkey == True:
@@ -138,6 +144,14 @@ class Player(pg.sprite.Sprite):
                 self.moneybag += 20
         if self.powerup == True:
             self.collide_with_group(self.game.mobs, True)
+    
+    def load_images(self):
+        self.standing_frames = [self.spritesheet.get_image(0,0, 32, 32), 
+                                self.spritesheet.get_image(32,0, 32, 32)]
+        # for frame in self.standing_frames:
+        #     frame.set_colorkey(BLACK)
+
+        # add other frame sets for different poses etc.
             
         
     
@@ -314,19 +328,21 @@ class Mob2(pg.sprite.Sprite):
         self.chase_distance = 500
         self.speed = 300
         self.chasing = True
+        self.hiding = hiding
       
         #self.hitpoints = 100
     def sensor(self):
-        if abs(self.rect.x - self.game.player1.rect.x) < self.chase_distance and abs(self.rect.y - self.game.player1.rect.y) < self.chase_distance:
-            self.chasing = True
-        else:
+        if self.hiding == True:
             self.chasing = False
+        else:
+             self.chasing = True
+
     
     def update(self):
         #if self.hitpoints <= 0:
             #self.kill()
         # self.sensor()
-        if self.chasing:
+        if self.chasing == True:
             self.rot = (self.game.player1.rect.center - self.pos).angle_to(vec(1, 0))
             self.rect = self.image.get_rect()
             self.rect.center = self.pos

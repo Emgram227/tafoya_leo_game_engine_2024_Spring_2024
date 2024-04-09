@@ -22,7 +22,7 @@ class Game:
         self.clock = pg.time.Clock()
         self.load_data()
     def load_data(self):
-        game_folder = path.dirname(__file__)
+        self.game_folder = path.dirname(__file__)
         self.map_data = []
         # 'r'     open for reading (default)
         # 'w'     open for writing, truncating the file first
@@ -43,6 +43,7 @@ class Game:
             for line in f:
                 print(line)
                 self.map_data.append(line)
+        self.img_folder = path.join(self.game_folder, 'images')
     # runs the game
     def new(self):
         self.all_sprites = pg.sprite.Group()
