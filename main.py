@@ -150,12 +150,12 @@ class Game:
             if self.player1.hitpoints < 0:
                 self.quit()
             if event.type == pg.KEYDOWN:
-                if event.key == pg.K_r:
-                    self.player1.image.fill(RED)
-                if event.key == pg.K_g:
-                    self.player1.image.fill(GREEN)
-                if event.key == pg.K_b:
-                    self.player1.image.fill(BLUE)
+                # if event.key == pg.K_r:
+                #     self.player1.image.fill(RED)
+                # if event.key == pg.K_g:
+                #     self.player1.image.fill(GREEN)
+                # if event.key == pg.K_b:
+                #     self.player1.image.fill(BLUE)
                 if event.key == pg.K_ESCAPE:
                     self.quit()
 

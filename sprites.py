@@ -18,7 +18,7 @@ class Player(pg.sprite.Sprite):
         self.image = pg.Surface((TILESIZE, TILESIZE))
         self.spritesheet = Spritesheet(path.join(img_folder, 'player_image.png'))
         self.load_images()
-        
+        self.image = self.standing_frames[0]
         self.rect = self.image.get_rect()
         self.vx, self.vy = 0, 0
         self.x = x * TILESIZE
@@ -81,7 +81,7 @@ class Player(pg.sprite.Sprite):
             if str(hits[0].__class__.__name__) == "Coin":
                 self.moneybag += 1
             if str(hits[0].__class__.__name__) == "PowerUp":
-                 self.image.fill(WHITE)
+                #  self.image.fill(WHITE)
                  self.speed *= 2
                  self.hitpoints = 100
                  print("PowerUp")
@@ -164,12 +164,17 @@ class Wall(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.image = pg.Surface((TILESIZE,TILESIZE))
-        self.image.fill(RED)
+        self.spritesheet = Spritesheet(path.join(img_folder, 'wall.png'))
+        self.load_images()
+        self.image = self.standing_frames[0]
         self.rect = self.image.get_rect()
         self.x = x
         self.y = y 
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
+    def load_images(self):
+        self.standing_frames = [self.spritesheet.get_image(0,0, 32, 32), 
+                                self.spritesheet.get_image(32,0, 32, 32)]
 
 class Coin(pg.sprite.Sprite):
     def __init__ (self,game,x,y):
@@ -302,12 +307,17 @@ class MobSpawner(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.image = pg.Surface((TILESIZE,TILESIZE))
-        self.image.fill(BLUE)
+        self.spritesheet = Spritesheet(path.join(img_folder, 'mob_spawner.png'))
+        self.load_images()
+        self.image = self.standing_frames[0]
         self.rect = self.image.get_rect()
         self.x = x
         self.y = y 
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
+    def load_images(self):
+        self.standing_frames = [self.spritesheet.get_image(0,0, 32, 32), 
+                                self.spritesheet.get_image(32,0, 32, 32)]
 
 class Mob2(pg.sprite.Sprite):
     def __init__(self, game, x, y):
