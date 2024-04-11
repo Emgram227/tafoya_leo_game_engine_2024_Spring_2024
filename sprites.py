@@ -16,7 +16,7 @@ class Player(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self,self.groups)
         self.game = game
         self.image = pg.Surface((TILESIZE, TILESIZE))
-        self.spritesheet = Spritesheet(path.join(img_folder, 'player_image.png'))
+        self.spritesheet = Spritesheet(path.join(img_folder, 'theBell.png'))
         self.load_images()
         self.image = self.standing_frames[0]
         self.rect = self.image.get_rect()
@@ -30,7 +30,8 @@ class Player(pg.sprite.Sprite):
         self.speed = 300
         self.hitpoints = 100
         self.cooldown = Timer(self)
-
+        self.current_frame = 0
+        self.last_update = 0
         self.test = True
 
     def get_keys(self):
@@ -107,10 +108,20 @@ class Player(pg.sprite.Sprite):
                         self.moneybag += 1
                         kill
             
-           
+    def animate(self):
+        now = pg.time.get_ticks()
+        if now - self.last_update > 350:
+            self.last_update = now
+            self.current_frame = (self.current_frame + 1) % len(self.standing_frames)
+            bottom = self.rect.bottom
+            self.image = self.standing_frames[self.current_frame]
+            self.rect = self.image.get_rect()
+            self.rect.bottom = bottom
 
 
     def update(self):
+        self.animate()
+        self.rect.x = self.x
         self.rect.y = self.y
          # add collision later
         self.collide_with_walls('y')
@@ -208,12 +219,17 @@ class Bush(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.image = pg.Surface((TILESIZE,TILESIZE))
-        self.image.fill(GREEN)
+        self.spritesheet = Spritesheet(path.join(img_folder, 'bush.png'))
+        self.load_images()
+        self.image = self.standing_frames[0]
         self.rect = self.image.get_rect()
         self.x = x
         self.y = y 
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
+    def load_images(self):
+        self.standing_frames = [self.spritesheet.get_image(0,0, 32, 32), 
+                                self.spritesheet.get_image(32,0, 32, 32)]
 
 class Chest(pg.sprite.Sprite):
     def __init__ (self,game,x,y):
@@ -221,12 +237,18 @@ class Chest(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.image = pg.Surface((TILESIZE,TILESIZE))
-        self.image.fill(BROWN)
+        self.spritesheet = Spritesheet(path.join(img_folder, 'chest.png'))
+        self.load_images()
+        self.image = self.standing_frames[0]
         self.rect = self.image.get_rect()
         self.x = x
         self.y = y 
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
+    def load_images(self):
+        self.standing_frames = [self.spritesheet.get_image(0,0, 32, 32), 
+                                self.spritesheet.get_image(32,0, 32, 32)]
+
 
 class Key(pg.sprite.Sprite):
     def __init__ (self,game,x,y):
