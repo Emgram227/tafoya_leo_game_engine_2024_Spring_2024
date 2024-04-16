@@ -92,15 +92,30 @@ class Player(pg.sprite.Sprite):
                 self.doorkey = True
                 print(self.doorkey)
             if str(hits[0].__class__.__name__) == "Bush":
+                global hiding
                 hiding = True
                 print(hiding)
             
             if str(hits[0].__class__.__name__) == "Chest":   
                 if self.doorkey == True:
-                    self.doorkey == False
+                    self.doorkey = False
                     self.moneybag += 10
                     kill
             if str(hits[0].__class__.__name__) == "Mob2":
+                    print ("hit")
+                    self.hitpoints -= 1
+                    if self.powerup == True:
+                        self.hitpoints += 1
+                        self.moneybag += 1
+                        kill
+            if str(hits[0].__class__.__name__) == "Mob":
+                    print ("hit")
+                    self.hitpoints -= 1
+                    if self.powerup == True:
+                        self.hitpoints += 1
+                        self.moneybag += 1
+                        kill
+            if str(hits[0].__class__.__name__) == "Ghost":
                     print ("hit")
                     self.hitpoints -= 1
                     if self.powerup == True:
@@ -299,24 +314,16 @@ class Mob(pg.sprite.Sprite):
             self.y += self.vy * self.game.dt
             
             if self.rect.x < self.game.player1.rect.x:
-                if self.hiding == True:
-                    self.vx = 0
-                else:
+         
                     self.vx = 100
             if self.rect.x > self.game.player1.rect.x:
-                 if self.hiding == True:
-                    self.vx = 0
-                 else:
+              
                     self.vx = -100
             if self.rect.y < self.game.player1.rect.y:
-                 if self.hiding == True:
-                    self.vy = 0
-                 else:
+               
                     self.vy = 100
             if self.rect.y > self.game.player1.rect.y:
-                 if self.hiding == True:
-                    self.vy = 0
-                 else:
+                
                     self.vy = -100
             self.rect.x = self.x
             self.collide_with_walls('x')
@@ -359,22 +366,20 @@ class Mob2(pg.sprite.Sprite):
         self.rot = 0
         self.chase_distance = 500
         self.speed = 300
-        self.chasing = True
-        self.hiding = hiding
-      
+        self.hiding = hiding 
         #self.hitpoints = 100
-    def sensor(self):
-        if self.hiding == True:
-            self.chasing = False
-        else:
-             self.chasing = True
+    # def sensor(self):
+    #     if self.hiding == True:
+    #         self.chasing = False
+    #     else:
+    #          self.chasing = True
 
     
     def update(self):
         #if self.hitpoints <= 0:
             #self.kill()
         # self.sensor()
-        if self.chasing == True:
+        if self.hiding == False:
             self.rot = (self.game.player1.rect.center - self.pos).angle_to(vec(1, 0))
             self.rect = self.image.get_rect()
             self.rect.center = self.pos

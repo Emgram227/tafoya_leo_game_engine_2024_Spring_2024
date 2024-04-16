@@ -84,8 +84,9 @@ class Game:
                     if not self.cooling:
                            print ("Working")
                            if tile == 'M':
-                                Mob2(self,col,row)                 
-              
+                                Mob2(self,col,row) 
+                                         
+
 
     def run(self):
         # creates "while" loop that triggers when running = true
@@ -100,7 +101,7 @@ class Game:
         sys.exit()
 
     def update(self): 
-        moblist = [Mob2, Mob, Ghost]
+        self.random = randint(1,3)
         self.cooldown.ticking()
         self.mob_timer.ticking()
         self.all_sprites.update()
@@ -110,7 +111,13 @@ class Game:
             for row, tiles in enumerate(self.map_data):
                 for col, tile in enumerate(tiles):
                     if tile == 'M':
-                        Mob2(self,col,row)
+                        if self.random == 1:
+                                Mob2(self,col,row) 
+                        if self.random == 2:
+                                Mob(self,col,row)
+                        if self.random == 3:        
+                                Ghost(self,col,row)         
+
                         
         
         
