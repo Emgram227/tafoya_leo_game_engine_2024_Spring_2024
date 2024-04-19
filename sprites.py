@@ -400,11 +400,10 @@ class Ghost(pg.sprite.Sprite):
         self.groups = game.all_sprites, game.mobs
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-        # self.image = game.mob_img
-        # self.image = pg.Surface((TILESIZE, TILESIZE))
-        # self.image.fill(ORANGE)
         self.image = pg.Surface((TILESIZE,TILESIZE))
-        self.image.fill(WHITE)
+        self.spritesheet = Spritesheet(path.join(img_folder, 'ghost.png'))
+        self.load_images()
+        self.image = self.standing_frames[0]
         self.rect = self.image.get_rect()
         self.hit_rect = MOB_HIT_RECT.copy()
         self.hit_rect.center = self.rect.center
@@ -419,6 +418,9 @@ class Ghost(pg.sprite.Sprite):
         self.chasing = True
       
         #self.hitpoints = 100
+    def load_images(self):
+        self.standing_frames = [self.spritesheet.get_image(0,0, 32, 32), 
+                                self.spritesheet.get_image(32,0, 32, 32)]
     def sensor(self):
         if abs(self.rect.x - self.game.player1.rect.x) < self.chase_distance and abs(self.rect.y - self.game.player1.rect.y) < self.chase_distance:
             self.chasing = True

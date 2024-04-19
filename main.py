@@ -83,8 +83,7 @@ class Game:
                         self.cooling = False
                     if not self.cooling:
                            print ("Working")
-                           if tile == 'M':
-                                Mob2(self,col,row) 
+                           Mob2(self,col,row) 
                                          
 
 
@@ -101,7 +100,7 @@ class Game:
         sys.exit()
 
     def update(self): 
-        self.random = randint(1,3)
+        self.random = randint(0,3)
         self.cooldown.ticking()
         self.mob_timer.ticking()
         self.all_sprites.update()
