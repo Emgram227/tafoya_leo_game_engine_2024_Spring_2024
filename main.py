@@ -1,6 +1,22 @@
 # This file was created by: Leo Tafoya
+''' 
+BETA Goals:
 
-#import everything 
+Better Textures
+
+Moving Camera
+
+Bigger Map
+
+Release version:
+Open World
+Weapons
+Bosses + More Enemies
+
+
+'''
+
+#import everything
 from utils import *
 import pygame as pg
 from settings import *
@@ -8,6 +24,10 @@ from sprites import *
 from random import randint
 import sys
 from os import path
+from camera import *
+
+
+
 
 #makes Game a class
 class Game:
@@ -39,7 +59,7 @@ class Game:
         It is used to ensure that a resource is properly closed or released 
         after it is used. This can help to prevent errors and leaks.
         '''
-        with open(path.join(game_folder, 'map.txt'), 'rt') as f:
+        with open(path.join(game_folder, 'map2.txt'), 'rt') as f:
             for line in f:
                 print(line)
                 self.map_data.append(line)
@@ -60,11 +80,11 @@ class Game:
         self.round_number = 1
         self.mob_timer.cd = 10 
         for row, tiles in enumerate(self.map_data):
-            print(row)
             for col, tile in enumerate(tiles):
-                print(col)
                 if tile == '1':
                     Wall(self,col,row)
+                if tile == '2':
+                    Stone(self,col,row)
                 if tile == 'P':
                     self.player1 = Player(self, col, row)
                 if tile == 'C':
@@ -79,11 +99,11 @@ class Game:
                     Chest(self,col,row)
                 if tile == 'M':
                     MobSpawner(self,col,row)
-                    if self.cooldown.cd < 1:
-                        self.cooling = False
-                    if not self.cooling:
-                           print ("Working")
-                           Mob2(self,col,row) 
+                    # if self.cooldown.cd < 1:
+                    #     self.cooling = False
+                    # if not self.cooling:
+                    #        print ("Working")
+                    Mob2(self,col,row) 
                                          
 
 
@@ -95,6 +115,9 @@ class Game:
             self.events()
             self.update()
             self.draw()
+            self.player1.update()
+            camera.update(self.player1)
+            self.screen.blit(self.player1.image, (WIDTH // 2 - self.player1.rect.width // 2, HEIGHT // 2 - self.player1.rect.height // 2)) 
     def quit(self):
         pg.quit()
         sys.exit()
@@ -162,6 +185,9 @@ class Game:
                 #     self.player1.image.fill(GREEN)
                 # if event.key == pg.K_b:
                 #     self.player1.image.fill(BLUE)
+                if event.key == pg.K_r:
+                    self.player1.weapon = True
+                    print("Weapon Equiped")
                 if event.key == pg.K_ESCAPE:
                     self.quit()
 

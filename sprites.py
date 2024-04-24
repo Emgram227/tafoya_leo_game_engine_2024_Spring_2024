@@ -33,6 +33,17 @@ class Player(pg.sprite.Sprite):
         self.current_frame = 0
         self.last_update = 0
         self.test = True
+        self.weapon = False
+        self.get_mouse()
+    
+    def get_mouse(self):
+        if pg.mouse.get_pressed()[0]:
+            print("Left Click")
+        if pg.mouse.get_pressed()[1]:
+            print("Middle Click")
+        if pg.mouse.get_pressed()[2]:
+            print("Right Click")
+
 
     def get_keys(self):
         self.vx, self.vy = 0, 0
@@ -183,8 +194,9 @@ class Player(pg.sprite.Sprite):
     
 
 
-
+#Wall Classes
 class Wall(pg.sprite.Sprite):
+    #Basic wall
     def __init__ (self,game,x,y):
         self.groups = game.all_sprites, game.walls
         pg.sprite.Sprite.__init__(self, self.groups)
@@ -201,6 +213,26 @@ class Wall(pg.sprite.Sprite):
     def load_images(self):
         self.standing_frames = [self.spritesheet.get_image(0,0, 32, 32), 
                                 self.spritesheet.get_image(32,0, 32, 32)]
+
+class Stone(pg.sprite.Sprite):
+    #Used for cliffs or caves
+    def __init__ (self,game,x,y):
+        self.groups = game.all_sprites, game.walls
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE,TILESIZE))
+        self.spritesheet = Spritesheet(path.join(img_folder, 'Stone.png'))
+        self.load_images()
+        self.image = self.standing_frames[0]
+        self.rect = self.image.get_rect()
+        self.x = x
+        self.y = y 
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
+    def load_images(self):
+        self.standing_frames = [self.spritesheet.get_image(0,0, 32, 32), 
+                                self.spritesheet.get_image(32,0, 32, 32)]
+
 
 class Coin(pg.sprite.Sprite):
     def __init__ (self,game,x,y):
@@ -285,7 +317,10 @@ class Mob(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.image = pg.Surface((TILESIZE, TILESIZE))
-        self.image.fill(RED)
+        self.spritesheet = Spritesheet(path.join(img_folder, 'zombie.png'))
+        self.load_images()
+        self.image = self.standing_frames[0]
+        
         self.rect = self.image.get_rect()
         self.x = x
         self.y = y
@@ -295,6 +330,9 @@ class Mob(pg.sprite.Sprite):
         self.speed = 1
         self.hiding = hiding
 
+    def load_images(self):
+        self.standing_frames = [self.spritesheet.get_image(0,0, 32, 32), 
+                                self.spritesheet.get_image(32,0, 32, 32)]
     def collide_with_walls(self, dir):
             if dir == 'x':
                 # print('colliding on the x')
@@ -356,7 +394,9 @@ class Mob2(pg.sprite.Sprite):
         # self.image = game.mob_img
         # self.image = pg.Surface((TILESIZE, TILESIZE))
         self.image = pg.Surface((TILESIZE,TILESIZE))
-        self.image.fill(BLUE)
+        self.spritesheet = Spritesheet(path.join(img_folder, 'skull.png'))
+        self.load_images()
+        self.image = self.standing_frames[0]
         self.rect = self.image.get_rect()
         self.hit_rect = MOB_HIT_RECT.copy()
         self.hit_rect.center = self.rect.center
@@ -373,6 +413,10 @@ class Mob2(pg.sprite.Sprite):
     #         self.chasing = False
     #     else:
     #          self.chasing = True
+
+    def load_images(self):
+        self.standing_frames = [self.spritesheet.get_image(0,0, 32, 32), 
+                                self.spritesheet.get_image(32,0, 32, 32)]
 
     
     def update(self):
