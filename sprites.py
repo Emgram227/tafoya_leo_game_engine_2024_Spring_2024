@@ -490,3 +490,21 @@ class Ghost(pg.sprite.Sprite):
             # self.hit_rect.centery = self.pos.y
             collide_with_walls(self, self.game.walls, 'y')
             # self.rect.center = self.hit_rect.center
+
+# class HealthBar(pg.sprite.Sprite):
+#     def __init__(self, game, x, y, w, h, target, pct):
+#         self.groups = game.all_sprites
+#         pg.sprite.Sprite.__init__(self, self.groups)
+#         self.game = game
+#         self.w = w
+#         self.h = h
+#         self.image = pg.Surface((w, h))
+#         self.rect = self.image.get_rect()
+#         self.image.fill(GREEN)
+#         self.rect.x = x
+#         self.rect.y = y
+#         self.target = target
+#         self.pct = pct
+#     def update(self):
+#         self.rect.x = self.target.rect.x
+#         self.rect.y = self.target.rect.y

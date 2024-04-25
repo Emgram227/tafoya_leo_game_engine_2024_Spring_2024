@@ -1,4 +1,4 @@
-import pygame
+'''import pygame
 import sys
 
 # Initialize Pygame
@@ -84,4 +84,44 @@ while running:
     clock.tick(60)
 
 pygame.quit()
-sys.exit()
+sys.exit() '''
+
+import pygame as pg
+from settings import *
+from sprites import *
+
+class Map:
+    def __init__(self, filename):
+        self.data = []
+        with open(filename, 'rt') as f:
+            for line in f:
+                self.data.append(line.strip())
+        self.tilewidth = len(self.data[0])
+        self.tileheight = len(self.data)
+        self.width = self.tilewidth * TILESIZE
+        self.height = self.tileheight * TILESIZE
+
+game_map = Map('Map2.txt')
+
+class Camera:
+    def __init__(self, width, height, game_map):
+        self.camera = pg.Rect(0, 0, width, height)
+        self.width = width
+        self.height = height
+        self.map_width = game_map.width
+        self.map_height = game_map.height
+
+    def apply(self, entity):
+        return entity.rect.move(self.camera.topleft)
+
+    def update(self, target):
+        x = -target.rect.x + int(self.width / 2)
+        y = -target.rect.y + int(self.height / 2)
+        
+        # Limit scrolling to map size
+        x = min(0, x)  # left
+        y = min(0, y)  # top
+        x = max(-(self.map_width - self.width), x)  # right
+        y = max(-(self.map_height - self.height), y)  # bottom
+        
+        self.camera = pg.Rect(x, y, self.width, self.height)

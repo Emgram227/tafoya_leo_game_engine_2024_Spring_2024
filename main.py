@@ -6,10 +6,10 @@ Better Textures
 
 Moving Camera
 
-Bigger Map
+Open World
 
 Release version:
-Open World
+Shop
 Weapons
 Bosses + More Enemies
 
@@ -24,7 +24,7 @@ from sprites import *
 from random import randint
 import sys
 from os import path
-from camera import *
+from scratch import *
 
 
 
@@ -43,6 +43,7 @@ class Game:
         self.load_data()
     def load_data(self):
         self.game_folder = path.dirname(__file__)
+        self.map = Map(path.join(game_folder, 'map2.txt'))
         self.map_data = []
         # 'r'     open for reading (default)
         # 'w'     open for writing, truncating the file first
@@ -59,10 +60,10 @@ class Game:
         It is used to ensure that a resource is properly closed or released 
         after it is used. This can help to prevent errors and leaks.
         '''
-        with open(path.join(game_folder, 'map2.txt'), 'rt') as f:
-            for line in f:
-                print(line)
-                self.map_data.append(line)
+        # with open(path.join(game_folder, 'map2.txt'), 'rt') as f:
+        #     for line in f:
+        #         print(line)
+        #         self.map_data.append(line)
         self.img_folder = path.join(self.game_folder, 'images')
     # runs the game
     def new(self):
@@ -77,6 +78,7 @@ class Game:
         self.mobspawner = pg.sprite.Group()
         self.mob_timer = Timer(self)
         self.cooldown = Timer(self)
+        self.camera = Camera(WIDTH, HEIGHT, game_map)
         self.round_number = 1
         self.mob_timer.cd = 10 
         for row, tiles in enumerate(self.map_data):
@@ -115,9 +117,7 @@ class Game:
             self.events()
             self.update()
             self.draw()
-            self.player1.update()
-            camera.update(self.player1)
-            self.screen.blit(self.player1.image, (WIDTH // 2 - self.player1.rect.width // 2, HEIGHT // 2 - self.player1.rect.height // 2)) 
+           
     def quit(self):
         pg.quit()
         sys.exit()
@@ -127,6 +127,7 @@ class Game:
         self.cooldown.ticking()
         self.mob_timer.ticking()
         self.all_sprites.update()
+        self.camera.update(self.player1)
         if self.mob_timer.cd < 1:
             self.mob_timer.cd = 10
             self.round_number += 1 
@@ -162,7 +163,9 @@ class Game:
     def draw(self):
             self.screen.fill(BGCOLOR)
             self.draw_grid()
-            self.all_sprites.draw(self.screen)
+            # self.all_sprites.draw(self.screen)
+            for sprite in self.all_sprites:
+                self.screen.blit(sprite.image, self.camera.apply(sprite))
             self.draw_text(self.screen, "Round", 24, WHITE, WIDTH/2.3 - 32, 2)
             self.draw_text(self.screen, str(self.round_number), 24, WHITE, WIDTH/2 - 32, 2)
             self.draw_text(self.screen, "Health", 24, WHITE, WIDTH/2.5 - 32, 30)
@@ -230,7 +233,7 @@ class Game:
                     waiting = False
             
 
-    
+   
 
 
     
