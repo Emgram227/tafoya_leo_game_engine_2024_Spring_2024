@@ -93,7 +93,7 @@ from sprites import *
 class Map:
     def __init__(self, filename):
         self.data = []
-        with open(filename, 'rt') as f:
+        with open(filename,'rt') as f:
             for line in f:
                 self.data.append(line.strip())
         self.tilewidth = len(self.data[0])
@@ -101,7 +101,7 @@ class Map:
         self.width = self.tilewidth * TILESIZE
         self.height = self.tileheight * TILESIZE
 
-game_map = Map('Map.txt')
+game_map = Map('Map2.txt')
 
 class Camera:
     def __init__(self, width, height, game_map):
