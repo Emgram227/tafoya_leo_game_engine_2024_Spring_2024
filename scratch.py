@@ -101,7 +101,7 @@ class Map:
         self.width = self.tilewidth * TILESIZE
         self.height = self.tileheight * TILESIZE
 
-game_map = Map('Map2.txt')
+game_map = Map('Map.txt')
 
 class Camera:
     def __init__(self, width, height, game_map):

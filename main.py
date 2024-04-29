@@ -43,7 +43,7 @@ class Game:
         self.load_data()
     def load_data(self):
         self.game_folder = path.dirname(__file__)
-        self.map = Map(path.join(game_folder, 'map2.txt'))
+        self.map = Map(path.join(game_folder, 'map.txt'))
         self.map_data = []
         # 'r'     open for reading (default)
         # 'w'     open for writing, truncating the file first
