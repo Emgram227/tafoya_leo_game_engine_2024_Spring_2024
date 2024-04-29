@@ -81,7 +81,7 @@ class Game:
         self.camera = Camera(WIDTH, HEIGHT, game_map)
         self.round_number = 1
         self.mob_timer.cd = 10 
-        for row, tiles in enumerate(self.map_data):
+        for row, tiles in enumerate(self.map.data):
             for col, tile in enumerate(tiles):
                 if tile == '1':
                     Wall(self,col,row)
