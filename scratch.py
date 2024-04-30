@@ -88,7 +88,6 @@ sys.exit() '''
 
 import pygame as pg
 from settings import *
-from sprites import *
 
 class Map:
     def __init__(self,filename):
@@ -101,14 +100,13 @@ class Map:
         self.width = self.tilewidth * TILESIZE
         self.height = self.tileheight * TILESIZE
 
-game_map = Map('map2.txt')
+game_map = Map(CURRENT_MAP)
 
 class Camera:
-    def __init__(self, width, height, game_map):
-        self.camera = pg.Rect(0, 0, width, height)
-        self.width = width
-        self.height = height
-
+    def __init__(self):
+        self.camera = pg.Rect(0, 0, WIDTH, HEIGHT)
+        self.width = WIDTH
+        self.height = HEIGHT
 
     def apply(self, entity):
         return entity.rect.move(self.camera.topleft)
@@ -118,8 +116,8 @@ class Camera:
         y = -target.rect.y + int(self.height / 2)
         
         # Limit scrolling to map size
-        x = min(0, x)  # left
-        y = min(0, y)  # top
-        x = max(-(self.map_width - self.width), x)  # right
-        y = max(-(self.map_height - self.height), y)  # bottom
+        # x = min(0, x)  # left
+        # y = min(0, y)  # top
+        # x = max(-(self.width - WIDTH), x)  # right
+        # y = max(-(self.height - HEIGHT), y)  # bottom
         self.camera = pg.Rect(x, y, self.width, self.height)

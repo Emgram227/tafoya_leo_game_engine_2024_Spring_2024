@@ -43,18 +43,9 @@ class Game:
         self.load_data()
     def load_data(self):
         self.game_folder = path.dirname(__file__)
-        self.map = Map(path.join(game_folder, 'map2.txt'))
+        self.map = Map(path.join(game_folder, CURRENT_MAP))
+        # self.map = Map(path.join(game_folder, levels[self.current_level]))
         self.map_data = []
-        # 'r'     open for reading (default)
-        # 'w'     open for writing, truncating the file first
-        # 'x'     open for exclusive creation, failing if the file already exists
-        # 'a'     open for writing, appending to the end of the file if it exists
-        # 'b'     binary mode
-        # 't'     text mode (default)
-        # '+'     open a disk file for updating (reading and writing)
-        # 'U'     universal newlines mode (deprecated)
-        # below opens file for reading in text mode
-        # with 
         '''
         The with statement is a context manager in Python. 
         It is used to ensure that a resource is properly closed or released 
@@ -65,6 +56,7 @@ class Game:
         #         print(line)
         #         self.map_data.append(line)
         self.img_folder = path.join(self.game_folder, 'images')
+        self.player_img = pg.image.load(path.join(self.img_folder, 'theBell.png')).convert_alpha()
     # runs the game
     def new(self):
         self.all_sprites = pg.sprite.Group()
@@ -78,7 +70,7 @@ class Game:
         self.mobspawner = pg.sprite.Group()
         self.mob_timer = Timer(self)
         self.cooldown = Timer(self)
-        self.camera = Camera(WIDTH, HEIGHT, game_map)
+        self.camera = Camera()
         self.round_number = 1
         self.mob_timer.cd = 10 
         for row, tiles in enumerate(self.map.data):
@@ -106,8 +98,6 @@ class Game:
                     # if not self.cooling:
                     #        print ("Working")
                     Mob2(self,col,row) 
-                                         
-
 
     def run(self):
         # creates "while" loop that triggers when running = true
@@ -127,11 +117,12 @@ class Game:
         self.cooldown.ticking()
         self.mob_timer.ticking()
         self.all_sprites.update()
+        # self.camera.apply(self.player1)
         self.camera.update(self.player1)
         if self.mob_timer.cd < 1:
             self.mob_timer.cd = 10
             self.round_number += 1 
-            for row, tiles in enumerate(self.map_data):
+            for row, tiles in enumerate(self.map.data):
                 for col, tile in enumerate(tiles):
                     if tile == 'M':
                         if self.random == 1:
@@ -163,6 +154,11 @@ class Game:
     def draw(self):
             self.screen.fill(BGCOLOR)
             self.draw_grid()
+            # for row, tiles in enumerate(game_map.data):
+            #      for col, tile in enumerate(tiles):
+            #      # Draw tiles at the correct position with camera offset
+            #          self.screen.blit(, (col * TILESIZE - self.camera.camera.x, row * TILESIZE - self.camera.camera.y))
+
             # self.all_sprites.draw(self.screen)
             for sprite in self.all_sprites:
                 self.screen.blit(sprite.image, self.camera.apply(sprite))
