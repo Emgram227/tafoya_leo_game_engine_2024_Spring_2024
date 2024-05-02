@@ -232,6 +232,44 @@ class Stone(pg.sprite.Sprite):
     def load_images(self):
         self.standing_frames = [self.spritesheet.get_image(0,0, 32, 32), 
                                 self.spritesheet.get_image(32,0, 32, 32)]
+        
+class Water(pg.sprite.Sprite):
+    #Used for bodies of water (collision is on to show that you can't swim)
+    def __init__ (self,game,x,y):
+        self.groups = game.all_sprites, game.walls
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE,TILESIZE))
+        self.spritesheet = Spritesheet(path.join(img_folder, 'water.png'))
+        self.load_images()
+        self.image = self.standing_frames[0]
+        self.rect = self.image.get_rect()
+        self.x = x
+        self.y = y 
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
+    def load_images(self):
+        self.standing_frames = [self.spritesheet.get_image(0,0, 32, 32), 
+                                self.spritesheet.get_image(32,0, 32, 32)]
+
+class Wood(pg.sprite.Sprite):
+    #Used for bodies of water (collision is on to show that you can't swim)
+    def __init__ (self,game,x,y):
+        self.groups = game.all_sprites, game.walls
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE,TILESIZE))
+        self.spritesheet = Spritesheet(path.join(img_folder, 'wood.png'))
+        self.load_images()
+        self.image = self.standing_frames[0]
+        self.rect = self.image.get_rect()
+        self.x = x
+        self.y = y 
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
+    def load_images(self):
+        self.standing_frames = [self.spritesheet.get_image(0,0, 32, 32), 
+                                self.spritesheet.get_image(32,0, 32, 32)]
 
 
 class Coin(pg.sprite.Sprite):

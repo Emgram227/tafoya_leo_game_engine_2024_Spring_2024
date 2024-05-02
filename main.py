@@ -79,6 +79,10 @@ class Game:
                     Wall(self,col,row)
                 if tile == '2':
                     Stone(self,col,row)
+                if tile == '3':
+                    Water(self,col,row)
+                if tile == '4':
+                    Wood(self,col,row)
                 if tile == 'P':
                     self.player1 = Player(self, col, row)
                 if tile == 'C':
@@ -138,9 +142,9 @@ class Game:
 
     def draw_grid(self):
         for x in range(0, WIDTH, TILESIZE):
-            pg.draw.line(self.screen, LIGHTGREY, (x,0) , (x,HEIGHT))
+            pg.draw.line(self.screen, BGCOLOR, (x,0) , (x,HEIGHT))
         for y in range(0, WIDTH, TILESIZE):
-            pg.draw.line(self.screen, LIGHTGREY, (0,y) , (WIDTH, y))
+            pg.draw.line(self.screen, BGCOLOR, (0,y) , (WIDTH, y))
     
     def draw_text(self,surface,text,size,color,x,y):
         font_name = pg.font.match_font('arial')
