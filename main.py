@@ -24,7 +24,7 @@ from sprites import *
 from random import randint
 import sys
 from os import path
-from scratch import *
+from camera import *
 
 
 
@@ -71,8 +71,9 @@ class Game:
         self.mob_timer = Timer(self)
         self.cooldown = Timer(self)
         self.camera = Camera()
+        self.game_object = GameObject(self.player1)
         self.round_number = 1
-        self.mob_timer.cd = 10 
+        self.mob_timer.cd = 10
         for row, tiles in enumerate(self.map.data):
             for col, tile in enumerate(tiles):
                 if tile == '1':
@@ -121,8 +122,11 @@ class Game:
         self.cooldown.ticking()
         self.mob_timer.ticking()
         self.all_sprites.update()
+        self.all_sprites.add(self.player1, self.game_object)
+        self.game_object.update()
         # self.camera.apply(self.player1)
         self.camera.update(self.player1)
+        
         if self.mob_timer.cd < 1:
             self.mob_timer.cd = 10
             self.round_number += 1 
@@ -193,6 +197,8 @@ class Game:
                     print("Weapon Equiped")
                 if event.key == pg.K_ESCAPE:
                     self.quit()
+                if event.key == pg.K_SPACE:
+                    self.game_object.following = not self.game_object.following
 
             # if event.type == pg.KEYDOWN:
             #     if event.key == pg.K_LEFT:

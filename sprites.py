@@ -34,6 +34,7 @@ class Player(pg.sprite.Sprite):
         self.last_update = 0
         self.test = True
         self.weapon = False
+        self.holding_object = False
         self.get_mouse()
     
     def get_mouse(self):
@@ -546,3 +547,18 @@ class Ghost(pg.sprite.Sprite):
 #     def update(self):
 #         self.rect.x = self.target.rect.x
 #         self.rect.y = self.target.rect.y
+
+class GameObject(pg.sprite.Sprite):
+    def __init__(self, player1):
+        super().__init__()
+        self.image = pg.Surface((30, 30))
+        self.image.fill(BLACK)
+        self.rect = self.image.get_rect()
+        self.player1 = player1
+        self.offset = (50, 0)  # Offset from the player
+        self.following = True  # Flag to indicate if the object is following the player
+
+    def update(self):
+        if self.following:
+            # Set object's position relative to the player
+            self.rect.center = (self.player1.rect.centerx + self.offset[0], self.player1.rect.centery + self.offset[1])

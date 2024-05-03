@@ -1,6 +1,6 @@
+
 import pygame
 import math
-from math import floor
 
 # Initialize Pygame
 pygame.init()
@@ -8,56 +8,58 @@ pygame.init()
 # Set up the screen
 WIDTH, HEIGHT = 1024, 768
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Compass Pointer")
+pygame.display.set_caption("Player with Object")
 
 # Colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 
-# Timer class
-class Timer:
-    def __init__(self):
-        self.current_time = 0
-        self.cd = 0
-
-    def update(self):
-        if self.cd > 0:
-            self.cd -= 1
-
-    def start_cooldown(self, seconds):
-        self.cd = seconds
-
-    def is_ready(self):
-        return self.cd == 0
-
-# Compass class
-class Compass(pygame.sprite.Sprite):
+# Player class
+class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.timer = Timer()
-        self.image = pygame.Surface((100, 100), pygame.SRCALPHA)
+        self.image = pygame.Surface((50, 50))
+        self.image.fill(RED)
         self.rect = self.image.get_rect(center=(WIDTH // 2, HEIGHT // 2))
-        pygame.draw.line(self.image, RED, (50, 50), (85, 50), 2)
+        self.holding_object = False
+
+    def update(self, keys):
+        dx, dy = 0, 0
+        if keys[pygame.K_w]:
+            dy -= 5
+        if keys[pygame.K_s]:
+            dy += 5
+        if keys[pygame.K_a]:
+            dx -= 5
+        if keys[pygame.K_d]:
+            dx += 5
+        self.rect.x += dx
+        self.rect.y += dy
+
+# Object class
+class GameObject(pygame.sprite.Sprite):
+    def __init__(self, player):
+        super().__init__()
+        self.image = pygame.Surface((5, 50))
+        self.image.fill(BLACK)
+        self.rect = self.image.get_rect()
+        self.player1 = player
+        self.offset = (50, 0)  # Offset from the player
+        self.following = True  # Flag to indicate if the object is following the player
 
     def update(self):
-        # Check if it's time to update the compass
-        if self.timer.is_ready():
-            # Rotate the compass towards the mouse cursor
-            mouse_x, mouse_y = pygame.mouse.get_pos()
-            rel_x, rel_y = mouse_x - self.rect.centerx, mouse_y - self.rect.centery
-            angle = (180 / math.pi) * -math.atan2(rel_y, rel_x)
-            self.image = pygame.transform.rotate(self.image, int(angle))
-            self.rect = self.image.get_rect(center=self.rect.center)
-            # Start cooldown
-            self.timer.start_cooldown(60)  # 60 frames cooldown (1 second at 60 FPS)
+        if self.following:
+            # Set object's position relative to the player
+            self.rect.center = (self.player1.rect.centerx + self.offset[0], self.player1.rect.centery + self.offset[1])
 
-# Create compass instance
-compass = Compass()
+# Create player and object instances
+player = Player()
+game_object = GameObject(player)
 
 # Group for sprites
 all_sprites = pygame.sprite.Group()
-all_sprites.add(compass)
+all_sprites.add(player, game_object)
 
 # Main loop
 running = True
@@ -66,10 +68,17 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                # Toggle whether the object follows the player
+                game_object.following = not game_object.following
 
-    # Update compass
-    compass.update()
-    compass.timer.update()
+    # Get pressed keys
+    keys = pygame.key.get_pressed()
+
+    # Update player and object
+    player.update(keys)
+    game_object.update()
 
     # Draw
     screen.fill(WHITE)
