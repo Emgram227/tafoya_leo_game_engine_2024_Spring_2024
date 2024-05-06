@@ -62,8 +62,10 @@ class Game:
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
         self.coins = pg.sprite.Group()
-        self.bushes = pg.sprite.Group()
+        self.walkthroughs = pg.sprite.Group()
         self.power_ups = pg.sprite.Group()
+        self.game_object = pg.sprite.Group()
+        # self.gameobject = GameObject()
         self.keys = pg.sprite.Group()
         self.chests = pg.sprite.Group()
         self.mobs = pg.sprite.Group()
@@ -71,7 +73,6 @@ class Game:
         self.mob_timer = Timer(self)
         self.cooldown = Timer(self)
         self.camera = Camera()
-        self.game_object = GameObject(self.player1)
         self.round_number = 1
         self.mob_timer.cd = 10
         for row, tiles in enumerate(self.map.data):
@@ -103,6 +104,8 @@ class Game:
                     # if not self.cooling:
                     #        print ("Working")
                     Mob2(self,col,row) 
+                if tile == 'N':
+                    Boss(self,col,row)
 
     def run(self):
         # creates "while" loop that triggers when running = true
@@ -199,29 +202,26 @@ class Game:
                     self.quit()
                 if event.key == pg.K_SPACE:
                     self.game_object.following = not self.game_object.following
-
-            # if event.type == pg.KEYDOWN:
             #     if event.key == pg.K_LEFT:
-            #         self.player1.move(dx=-1)
-            #     if event.key == pg.K_RIGHT:
-            #         self.player1.move(dx=1)
-            #     if event.key == pg.K_UP:
-            #         self.player1.move(dy=-1)
-            #     if event.key == pg.K_DOWN:
-            #         self.player1.move(dy=1)
-            #     if event.key == pg.K_a:
-            #         self.player1.move(dx=-1)
-            #     if event.key == pg.K_d:
-            #         self.player1.move(dx=1)
-            #     if event.key == pg.K_w:
-            #         self.player1.move(dy=-1)
-            #     if event.key == pg.K_s:
-            #         self.player1.move(dy=1)
-            #     if event.key == pg.K_SPACE:
-            #         self.player1.image.fill == (RED)
-            #         pass
+            #       self.player1.move(dx=-1)
+            #   if event.key == pg.K_RIGHT:
+            #       self.player1.move(dx=1)
+            #   if event.key == pg.K_UP:
+            #       self.player1.move(dy=-1)
+            #   if event.key == pg.K_DOWN:
+            #       self.player1.move(dy=1)
+            #   if event.key == pg.K_a:s
+            #       self.player1.move(dx=-1)
+            #   if event.key == pg.K_d:
+            #       self.player1.move(dx=1)
+            #   if event.key == pg.K_w:
+            #       self.player1.move(dy=-1)
+            #   if event.key == pg.K_s:
+            #       self.player1.move(dy=1)
+
     def show_start_screen(self):
-        self.screen.fill(BLUE)
+        self.spritesheet = Spritesheet(path.join(img_folder, 'chest.png'))
+        # self.screen.fill(BLUE)
         self.draw_text(self.screen,"this is the start screen",100 ,WHITE, WIDTH/6, HEIGHT/2-32)
         pg.display.flip()
         self.wait_for_key()
@@ -237,12 +237,6 @@ class Game:
                     self.quit()
                 if event.type == pg.KEYUP:
                     waiting = False
-            
-
-   
-
-
-    
 
 # Instantiates the game...
 g = Game()

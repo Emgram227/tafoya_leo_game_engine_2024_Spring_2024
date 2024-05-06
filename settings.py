@@ -21,7 +21,7 @@ BROWN = (75,75,0)
 ORANGE = (255,100,0)
 CURRENT_MAP = 'map2.txt'
 
-MOB_HIT_RECT = pg.Rect(0,0,96,96)
+MOB_HIT_RECT = pg.Rect(0,0,32,32)
 
 PLAYER_SPEED = 300
 

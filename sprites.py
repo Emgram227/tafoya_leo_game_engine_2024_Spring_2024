@@ -1,5 +1,6 @@
 # this file was created by: Leo Tafoya
 # this code was inspired by Zelda and informed by Chris Bradfield
+from typing import Any
 import pygame as pg
 from settings import *
 from utils import *
@@ -165,7 +166,7 @@ class Player(pg.sprite.Sprite):
         self.rect.y = self.y 
         # add collision later
         self.collide_with_walls('y')
-        self.collide_with_group(self.game.bushes, False)
+        self.collide_with_group(self.game.walkthroughs, False)
         if self.cooldown.cd < 1:
                 self.cooling = False
                 if not self.cooling:
@@ -237,7 +238,7 @@ class Stone(pg.sprite.Sprite):
 class Water(pg.sprite.Sprite):
     #Used for bodies of water (collision is on to show that you can't swim)
     def __init__ (self,game,x,y):
-        self.groups = game.all_sprites, game.walls
+        self.groups = game.all_sprites, game.walkthroughs
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.image = pg.Surface((TILESIZE,TILESIZE))
@@ -279,12 +280,33 @@ class Coin(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.image = pg.Surface((TILESIZE,TILESIZE))
-        self.image.fill(YELLOW)
+        self.spritesheet = Spritesheet(path.join(img_folder, 'coin.png'))
+        self.load_images()
+        self.last_update = 0
+        self.current_frame = 0
+        self.image = self.standing_frames[0]
         self.rect = self.image.get_rect()
         self.x = x
         self.y = y 
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
+    
+    def load_images(self):
+        self.standing_frames = [self.spritesheet.get_image(0,0, 32, 32), 
+                                self.spritesheet.get_image(32,0, 32, 32)]
+    def animate(self):
+        now = pg.time.get_ticks()
+        if now - self.last_update > 350:
+            self.last_update = now
+            self.current_frame = (self.current_frame + 5) % len(self.standing_frames)
+            bottom = self.rect.bottom
+            self.image = self.standing_frames[self.current_frame]
+            self.rect = self.image.get_rect()
+            self.rect.bottom = bottom
+    
+    def update(self):
+        self.animate()
+
 
 class PowerUp(pg.sprite.Sprite):
     def __init__ (self,game,x,y):
@@ -301,7 +323,7 @@ class PowerUp(pg.sprite.Sprite):
 
 class Bush(pg.sprite.Sprite):
     def __init__ (self,game,x,y):
-        self.groups = game.all_sprites, game.bushes
+        self.groups = game.all_sprites, game.walkthroughs
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.image = pg.Surface((TILESIZE,TILESIZE))
@@ -549,9 +571,10 @@ class Ghost(pg.sprite.Sprite):
 #         self.rect.y = self.target.rect.y
 
 class GameObject(pg.sprite.Sprite):
-    def __init__(self, player1):
+    def __init__(self, player1, game):
         super().__init__()
-        self.image = pg.Surface((30, 30))
+        self.groups = game.all_sprites
+        self.image = pg.Surface((5, 50))
         self.image.fill(BLACK)
         self.rect = self.image.get_rect()
         self.player1 = player1
@@ -562,3 +585,55 @@ class GameObject(pg.sprite.Sprite):
         if self.following:
             # Set object's position relative to the player
             self.rect.center = (self.player1.rect.centerx + self.offset[0], self.player1.rect.centery + self.offset[1])
+
+
+class Boss(pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.groups = game.all_sprites, game.mobs
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((40,50))
+        self.spritesheet = Spritesheet(path.join(img_folder, 'boss2.png'))
+        self.load_images()
+        self.image = self.standing_frames[0]
+        self.rect = self.image.get_rect()
+        self.hit_rect = pg.Rect(0,0,48,66).copy()
+        self.hit_rect.center = self.rect.center
+        self.pos = vec(x, y) * TILESIZE
+        self.vel = vec(0, 0)
+        self.acc = vec(0, 0)
+        self.rot = 0
+        self.chase_distance = 500
+        self.speed = 300
+        self.hiding = hiding 
+        #self.hitpoints = 100
+    # def sensor(self):
+    #     if self.hiding == True:
+    #         self.chasing = False
+    #     else:
+    #          self.chasing = True
+
+    def load_images(self):
+        self.standing_frames = [self.spritesheet.get_image(0,0, 48, 66), 
+                                self.spritesheet.get_image(32,0, 48, 66)]
+
+    
+    def update(self):
+        #if self.hitpoints <= 0:
+            #self.kill()
+        # self.sensor()
+        if self.hiding == False:
+            self.rot = (self.game.player1.rect.center - self.pos).angle_to(vec(1, 0))
+            self.rect = self.image.get_rect()
+            self.rect.center = self.pos
+            self.acc = vec(self.speed, 0).rotate(-self.rot)
+            self.acc += self.vel * -1
+            self.vel += self.acc * self.game.dt
+            # equation of motion
+            self.pos += self.vel * self.game.dt + 0.5 * self.acc * self.game.dt ** 2
+            # hit_rect used to account for adjusting the square collision when image rotates
+            self.hit_rect.centerx = self.pos.x
+            collide_with_walls(self, self.game.walls, 'x')
+            self.hit_rect.centery = self.pos.y
+            collide_with_walls(self, self.game.walls, 'y')
+            self.rect.center = self.hit_rect.center

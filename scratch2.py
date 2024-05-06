@@ -1,14 +1,14 @@
 
-import pygame
+import pygame as pg
 import math
 
 # Initialize Pygame
-pygame.init()
+pg.init()
 
 # Set up the screen
 WIDTH, HEIGHT = 1024, 768
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Player with Object")
+screen = pg.display.set_mode((WIDTH, HEIGHT))
+pg.display.set_caption("Player with Object")
 
 # Colors
 WHITE = (255, 255, 255)
@@ -16,37 +16,54 @@ BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 
 # Player class
-class Player(pygame.sprite.Sprite):
+class Player(pg.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.Surface((50, 50))
+        self.image = pg.Surface((50, 50))
         self.image.fill(RED)
         self.rect = self.image.get_rect(center=(WIDTH // 2, HEIGHT // 2))
         self.holding_object = False
+        # self.game_object = game_object
 
     def update(self, keys):
+        # self.collide_with_group(self.game_object, True)
         dx, dy = 0, 0
-        if keys[pygame.K_w]:
+        if keys[pg.K_w]:
             dy -= 5
-        if keys[pygame.K_s]:
+        if keys[pg.K_s]:
             dy += 5
-        if keys[pygame.K_a]:
+        if keys[pg.K_a]:
             dx -= 5
-        if keys[pygame.K_d]:
+        if keys[pg.K_d]:
             dx += 5
         self.rect.x += dx
         self.rect.y += dy
+        
+    def collide_with_group(self,group,kill):
+        hits = pg.sprite.spritecollide(self, group, kill)
+        if hits:
+             if str(hits[0].__class__.__name__) == "GameObject":
+                 self.holding_object = True
+                 game_object.following = True
+                 print("Works")
 
 # Object class
-class GameObject(pygame.sprite.Sprite):
-    def __init__(self, player):
+class GameObject(pg.sprite.Sprite):
+    def __init__(self, player1):
         super().__init__()
-        self.image = pygame.Surface((5, 50))
+        self.image = pg.Surface((5, 50))
         self.image.fill(BLACK)
         self.rect = self.image.get_rect()
-        self.player1 = player
+        self.player1 = player1
         self.offset = (50, 0)  # Offset from the player
-        self.following = True  # Flag to indicate if the object is following the player
+        self.following = False # Flag to indicate if the object is following the player
+
+    def collide_with_group(self,group,kill):
+        hits = pg.sprite.spritecollide(self, group, kill)
+        if hits:
+             if str(hits[0].__class__.__name__) == "Player":
+                player1.holding_object = True
+                self.following = True
 
     def update(self):
         if self.following:
@@ -54,38 +71,38 @@ class GameObject(pygame.sprite.Sprite):
             self.rect.center = (self.player1.rect.centerx + self.offset[0], self.player1.rect.centery + self.offset[1])
 
 # Create player and object instances
-player = Player()
-game_object = GameObject(player)
+player1 = Player()
+game_object = GameObject(player1)
 
 # Group for sprites
-all_sprites = pygame.sprite.Group()
-all_sprites.add(player, game_object)
+all_sprites = pg.sprite.Group()
+all_sprites.add(player1, game_object)
 
 # Main loop
 running = True
 while running:
     # Handle events
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
+    for event in pg.event.get():
+        if event.type == pg.QUIT:
             running = False
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
+        elif event.type == pg.KEYDOWN:
+            if event.key == pg.K_SPACE:
                 # Toggle whether the object follows the player
                 game_object.following = not game_object.following
 
     # Get pressed keys
-    keys = pygame.key.get_pressed()
+    keys = pg.key.get_pressed()
 
     # Update player and object
-    player.update(keys)
+    player1.update(keys)
     game_object.update()
 
     # Draw
     screen.fill(WHITE)
     all_sprites.draw(screen)
-    pygame.display.flip()
+    pg.display.flip()
 
     # Cap the frame rate
-    pygame.time.Clock().tick(60)
+    pg.time.Clock().tick(60)
 
-pygame.quit()
+pg.quit()
