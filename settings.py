@@ -1,7 +1,16 @@
 #this file was created by Leo Tafoya
 import pygame as pg
-WIDTH = 1024
-HEIGHT = 768
+
+#Fullscreen Values
+fsHeight = 1440
+fsWidth = 960 #Use 900 for fullscreen + top tab
+
+#Regular Values
+regHeight = 1024
+regWidth = 768
+
+WIDTH = regHeight # just change to numbers if you want
+HEIGHT = regWidth
 
 FPS = 30
 

@@ -141,7 +141,8 @@ class Game:
                         if self.random == 2:
                                 Mob(self,col,row)
                         if self.random == 3:        
-                                Ghost(self,col,row)         
+                                Ghost(self,col,row)        
+             
 
                         
         
@@ -202,11 +203,18 @@ class Game:
                     self.quit()
                 if event.key == pg.K_SPACE:
                     self.game_object.following = not self.game_object.following
+            elif event.type == pg.MOUSEBUTTONDOWN:
+                     if event.button == 1:  # Left mouse button
+                        self.player_posx = self.player1.rect.centerx
+                        self.player_posy = self.player1.rect.centery
+                        self.mouse_pos = pg.mouse.get_pos()
+                        self.bullet = Bullet(self, self.player_posx, self.player_posy, self.mouse_pos[0], self.mouse_pos[1])
+                        self.all_sprites.add(self.bullet)
             #     if event.key == pg.K_LEFT:
             #       self.player1.move(dx=-1)
             #   if event.key == pg.K_RIGHT:
             #       self.player1.move(dx=1)
-            #   if event.key == pg.K_UP:
+            #   if event.key == pg.K_UP:w
             #       self.player1.move(dy=-1)
             #   if event.key == pg.K_DOWN:
             #       self.player1.move(dy=1)
@@ -236,6 +244,8 @@ class Game:
                     waiting = False
                     self.quit()
                 if event.type == pg.KEYUP:
+                    waiting = False
+                if event.type == pg.MOUSEBUTTONDOWN:
                     waiting = False
 
 # Instantiates the game...

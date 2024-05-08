@@ -5,7 +5,7 @@ import pygame as pg
 from settings import *
 from utils import *
 from os import path
-
+import math
 
 game_folder = path.dirname(__file__)
 img_folder = path.join(game_folder, 'images')
@@ -283,7 +283,7 @@ class Coin(pg.sprite.Sprite):
         self.spritesheet = Spritesheet(path.join(img_folder, 'coin.png'))
         self.load_images()
         self.last_update = 0
-        self.current_frame = 0
+        self.current_frame = 4
         self.image = self.standing_frames[0]
         self.rect = self.image.get_rect()
         self.x = x
@@ -570,6 +570,7 @@ class Ghost(pg.sprite.Sprite):
 #         self.rect.x = self.target.rect.x
 #         self.rect.y = self.target.rect.y
 
+#ChatGPT
 class GameObject(pg.sprite.Sprite):
     def __init__(self, player1, game):
         super().__init__()
@@ -637,3 +638,68 @@ class Boss(pg.sprite.Sprite):
             self.hit_rect.centery = self.pos.y
             collide_with_walls(self, self.game.walls, 'y')
             self.rect.center = self.hit_rect.center
+
+
+#ChatGPT
+class Bullet(pg.sprite.Sprite):
+    def __init__(self, game, start_x, start_y, target_x, target_y):
+        self.game = game
+        super().__init__()
+        self.image = pg.Surface((16, 16))
+        self.image.fill(BLUE)
+        self.rect = self.image.get_rect()
+        # Ensure start_x and start_y are integers and within screen bounds
+        # self.rect.centerx = max(0, min(start_x, WIDTH - 1))
+        # self.rect.centery = max(0, min(start_y, HEIGHT - 1))
+        self.rect.center = (start_x, start_y)
+        self.speed = 10
+        distance = math.sqrt((target_x - start_x) ** 2 + (target_y - start_y) ** 2)
+        self.dx = self.speed * (target_x - start_x) / distance
+        self.dy = self.speed * (target_y - start_y) / distance
+
+    def update(self):
+        self.collide_with_group(self.game.mobs, True)
+        # self.collide_with_walls('x')
+        # self.collide_with_walls('y')
+        self.rect.x += self.dx
+        self.rect.y += self.dy
+        # Remove bullet if it goes out of screen
+        # if not pg.Rect(0, 0, WIDTH, HEIGHT).colliderect(self.rect):
+        #     self.kill()
+
+    def collide_with_group(self,group,kill):
+        hits = pg.sprite.spritecollide(self, group, kill)
+        if hits:
+            if str(hits[0].__class__.__name__) == "Mob2":
+                    print ("shot")
+                    kill
+                    self.kill()
+            if str(hits[0].__class__.__name__) == "Mob":
+                    print ("shot")
+                    kill
+                    self.kill()
+            if str(hits[0].__class__.__name__) == "Ghost":
+                    print ("shot")
+                    kill
+                    self.kill()
+    # def collide_with_walls(self, dir):
+    #     if dir == 'x':
+    #        hits = pg.sprite.spritecollide(self, self.game.walls, False)
+    #        if hits:
+    #            if self.dx > 0:
+    #                self.x = hits[0].rect.left - self.rect.width
+    #            if self.dx < 0:
+    #                self.x = hits[0].rect.right
+    #            self.vx = 0
+    #            self.rect.x = self.x
+    #     if dir == 'y':
+    #        hits = pg.sprite.spritecollide(self, self.game.walls, False)
+    #        if hits:
+    #            if self.dy > 0:
+    #                self.y = hits[0].rect.top - self.rect.height
+    #            if self.dy < 0:
+    #                self.y= hits[0].rect.bottom
+    #            self.vy = 0
+    #            self.rect.y= self.y
+    
+      
