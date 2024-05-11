@@ -108,11 +108,18 @@ class Player(pg.sprite.Sprite):
                 global hiding
                 hiding = True
                 print(hiding)
+            else:
+                hiding = False
             
             if str(hits[0].__class__.__name__) == "Chest":   
                 if self.doorkey == True:
                     self.doorkey = False
                     self.moneybag += 10
+                    self.game.ammo += 10
+                    if self.hitpoints > 100:
+                        pass
+                    else:
+                        self.hitpoints += 5
                     kill
             if str(hits[0].__class__.__name__) == "Mob2":
                     print ("hit")
@@ -135,7 +142,7 @@ class Player(pg.sprite.Sprite):
                         self.hitpoints += 1
                         self.moneybag += 1
                         kill
-            
+
     def animate(self):
         now = pg.time.get_ticks()
         if now - self.last_update > 350:
@@ -395,39 +402,47 @@ class Mob(pg.sprite.Sprite):
         self.standing_frames = [self.spritesheet.get_image(0,0, 32, 32), 
                                 self.spritesheet.get_image(32,0, 32, 32)]
     def collide_with_walls(self, dir):
-            if dir == 'x':
-                # print('colliding on the x')
-                hits = pg.sprite.spritecollide(self, self.game.walls, False)
-                if hits:
-                    self.vx *= -1
-                    self.rect.x = self.x
-            if dir == 'y':
-                # print('colliding on the y')
-                hits = pg.sprite.spritecollide(self, self.game.walls, False)
-                if hits:
-                    self.vy *= -1
-                    self.rect.y = self.y
+        if dir == 'x':
+           hits = pg.sprite.spritecollide(self, self.game.walls, False)
+           if hits:
+               if self.vx > 0:
+                   self.x = hits[0].rect.left - self.rect.width
+               if self.vx < 0:
+                   self.x = hits[0].rect.right
+               self.vx = 0
+               self.rect.x = self.x
+        if dir == 'y':
+           hits = pg.sprite.spritecollide(self, self.game.walls, False)
+           if hits:
+               if self.vy > 0:
+                   self.y = hits[0].rect.top - self.rect.height
+               if self.vy < 0:
+                   self.y= hits[0].rect.bottom
+               self.vy = 0
+               self.rect.y= self.y
+   
     def update(self):
             # self.rect.x += 1
-            self.x += self.vx * self.game.dt
-            self.y += self.vy * self.game.dt
-            
-            if self.rect.x < self.game.player1.rect.x:
-         
-                    self.vx = 100
-            if self.rect.x > self.game.player1.rect.x:
-              
-                    self.vx = -100
-            if self.rect.y < self.game.player1.rect.y:
-               
-                    self.vy = 100
-            if self.rect.y > self.game.player1.rect.y:
+            if hiding == False:
+                self.x += self.vx * self.game.dt
+                self.y += self.vy * self.game.dt
                 
-                    self.vy = -100
-            self.rect.x = self.x
-            self.collide_with_walls('x')
-            self.rect.y = self.y
-            self.collide_with_walls('y')
+                if self.rect.x < self.game.player1.rect.x:
+            
+                        self.vx = 100
+                if self.rect.x > self.game.player1.rect.x:
+                
+                        self.vx = -100
+                if self.rect.y < self.game.player1.rect.y:
+                
+                        self.vy = 100
+                if self.rect.y > self.game.player1.rect.y:
+                    
+                        self.vy = -100
+                self.rect.x = self.x
+                self.collide_with_walls('x')
+                self.rect.y = self.y
+                self.collide_with_walls('y')
 
 class MobSpawner(pg.sprite.Sprite):
     def __init__ (self,game,x,y):
@@ -484,7 +499,7 @@ class Mob2(pg.sprite.Sprite):
         #if self.hitpoints <= 0:
             #self.kill()
         # self.sensor()
-        if self.hiding == False:
+        if hiding == False:
             self.rot = (self.game.player1.rect.center - self.pos).angle_to(vec(1, 0))
             self.rect = self.image.get_rect()
             self.rect.center = self.pos
@@ -536,21 +551,22 @@ class Ghost(pg.sprite.Sprite):
         #if self.hitpoints <= 0:
             #self.kill()
         # self.sensor()
-        if self.chasing:
-            self.rot = (self.game.player1.rect.center - self.pos).angle_to(vec(1, 0))
-            self.rect = self.image.get_rect()
-            self.rect.center = self.pos
-            self.acc = vec(self.speed, 0).rotate(-self.rot)
-            self.acc += self.vel * -1
-            self.vel += self.acc * self.game.dt
-            # equation of motion
-            self.pos += self.vel * self.game.dt + 0.5 * self.acc * self.game.dt ** 2
-            # hit_rect used to account for adjusting the square collision when image rotates
-            # self.hit_rect.centerx = self.pos.x
-            collide_with_walls(self, self.game.walls, 'x')
-            # self.hit_rect.centery = self.pos.y
-            collide_with_walls(self, self.game.walls, 'y')
-            # self.rect.center = self.hit_rect.center
+        if hiding == False:
+            if self.chasing:
+                self.rot = (self.game.player1.rect.center - self.pos).angle_to(vec(1, 0))
+                self.rect = self.image.get_rect()
+                self.rect.center = self.pos
+                self.acc = vec(self.speed, 0).rotate(-self.rot)
+                self.acc += self.vel * -1
+                self.vel += self.acc * self.game.dt
+                # equation of motion
+                self.pos += self.vel * self.game.dt + 0.5 * self.acc * self.game.dt ** 2
+                # hit_rect used to account for adjusting the square collision when image rotates
+                # self.hit_rect.centerx = self.pos.x
+                collide_with_walls(self, self.game.walls, 'x')
+                # self.hit_rect.centery = self.pos.y
+                collide_with_walls(self, self.game.walls, 'y')
+                # self.rect.center = self.hit_rect.center
 
 # class HealthBar(pg.sprite.Sprite):
 #     def __init__(self, game, x, y, w, h, target, pct):
@@ -571,21 +587,21 @@ class Ghost(pg.sprite.Sprite):
 #         self.rect.y = self.target.rect.y
 
 #ChatGPT
-class GameObject(pg.sprite.Sprite):
-    def __init__(self, player1, game):
-        super().__init__()
-        self.groups = game.all_sprites
-        self.image = pg.Surface((5, 50))
-        self.image.fill(BLACK)
-        self.rect = self.image.get_rect()
-        self.player1 = player1
-        self.offset = (50, 0)  # Offset from the player
-        self.following = True  # Flag to indicate if the object is following the player
+# class GameObject(pg.sprite.Sprite):
+#     def __init__(self, player1, game):
+#         super().__init__()
+#         self.groups = game.all_sprites
+#         self.image = pg.Surface((5, 50))
+#         self.image.fill(BLACK)
+#         self.rect = self.image.get_rect()
+#         self.player1 = player1
+#         self.offset = (50, 0)  # Offset from the player
+#         self.following = True  # Flag to indicate if the object is following the player
 
-    def update(self):
-        if self.following:
-            # Set object's position relative to the player
-            self.rect.center = (self.player1.rect.centerx + self.offset[0], self.player1.rect.centery + self.offset[1])
+#     def update(self):
+#         if self.following:
+#             # Set object's position relative to the player
+#             self.rect.center = (self.player1.rect.centerx + self.offset[0], self.player1.rect.centery + self.offset[1])
 
 
 class Boss(pg.sprite.Sprite):
@@ -606,7 +622,6 @@ class Boss(pg.sprite.Sprite):
         self.rot = 0
         self.chase_distance = 500
         self.speed = 300
-        self.hiding = hiding 
         #self.hitpoints = 100
     # def sensor(self):
     #     if self.hiding == True:
@@ -623,7 +638,7 @@ class Boss(pg.sprite.Sprite):
         #if self.hitpoints <= 0:
             #self.kill()
         # self.sensor()
-        if self.hiding == False:
+        if hiding == False:
             self.rot = (self.game.player1.rect.center - self.pos).angle_to(vec(1, 0))
             self.rect = self.image.get_rect()
             self.rect.center = self.pos
@@ -640,22 +655,21 @@ class Boss(pg.sprite.Sprite):
             self.rect.center = self.hit_rect.center
 
 
-#ChatGPT
+
+#Modified from ChatGPT
 class Bullet(pg.sprite.Sprite):
     def __init__(self, game, start_x, start_y, target_x, target_y):
-        self.game = game
         super().__init__()
-        self.image = pg.Surface((16, 16))
+        self.game = game
+        self.image = pg.Surface((10, 10))
         self.image.fill(BLUE)
         self.rect = self.image.get_rect()
-        # Ensure start_x and start_y are integers and within screen bounds
-        # self.rect.centerx = max(0, min(start_x, WIDTH - 1))
-        # self.rect.centery = max(0, min(start_y, HEIGHT - 1))
         self.rect.center = (start_x, start_y)
         self.speed = 10
         distance = math.sqrt((target_x - start_x) ** 2 + (target_y - start_y) ** 2)
         self.dx = self.speed * (target_x - start_x) / distance
         self.dy = self.speed * (target_y - start_y) / distance
+
 
     def update(self):
         self.collide_with_group(self.game.mobs, True)

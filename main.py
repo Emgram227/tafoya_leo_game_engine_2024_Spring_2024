@@ -75,6 +75,8 @@ class Game:
         self.camera = Camera()
         self.round_number = 1
         self.mob_timer.cd = 10
+        self.magazine = 10
+        self.ammo = 50
         for row, tiles in enumerate(self.map.data):
             for col, tile in enumerate(tiles):
                 if tile == '1':
@@ -122,6 +124,7 @@ class Game:
 
     def update(self): 
         self.random = randint(0,3)
+        # self.mouse_pos = pg.mouse.get_pos()
         self.cooldown.ticking()
         self.mob_timer.ticking()
         self.all_sprites.update()
@@ -180,6 +183,14 @@ class Game:
             self.draw_text(self.screen, str(self.player1.hitpoints), 24, WHITE, WIDTH/2 - 32, 30)
             self.draw_text(self.screen, "Money", 24, WHITE, WIDTH/2.5 - 32, 60)
             self.draw_text(self.screen, str(self.player1.moneybag), 24, WHITE, WIDTH/2 - 32, 60)
+            self.draw_text(self.screen, "Ammo", 24, WHITE, WIDTH/2.5 - 32, 90)
+            if self.ammo > 0:
+                if self.magazine > 0:
+                    self.draw_text(self.screen, str(self.magazine), 24, WHITE, WIDTH/2 - 32, 90)
+                else:
+                    self.draw_text(self.screen, "Reload", 24, WHITE, WIDTH/2 - 32, 90)
+            else:
+                self.draw_text(self.screen, "Out of Ammo", 24, WHITE, WIDTH/2 - 32, 90)
             pg.display.flip()
     
 
@@ -197,19 +208,33 @@ class Game:
                 # if event.key == pg.K_b:
                 #     self.player1.image.fill(BLUE)
                 if event.key == pg.K_r:
-                    self.player1.weapon = True
-                    print("Weapon Equiped")
+                    if self.ammo > 0:
+                        self.magazine = 10
+                        self.ammo -= 10
+                    # self.player1.weapon = True
+                    # print("Weapon Equiped")
                 if event.key == pg.K_ESCAPE:
                     self.quit()
-                if event.key == pg.K_SPACE:
-                    self.game_object.following = not self.game_object.following
+                # if event.key == pg.K_SPACE:
+                #     self.game_object.following = not self.game_object.following
             elif event.type == pg.MOUSEBUTTONDOWN:
                      if event.button == 1:  # Left mouse button
-                        self.player_posx = self.player1.rect.centerx
-                        self.player_posy = self.player1.rect.centery
-                        self.mouse_pos = pg.mouse.get_pos()
-                        self.bullet = Bullet(self, self.player_posx, self.player_posy, self.mouse_pos[0], self.mouse_pos[1])
-                        self.all_sprites.add(self.bullet)
+                        if self.magazine > 0:
+                            self.magazine -= 1
+                            self.mouse_x, self.mouse_y = event.pos
+                            self.player_posx = self.player1.rect.centerx
+                            self.player_posy = self.player1.rect.centery
+                            # self.mouse_pos = pg.mouse.get_pos()
+                             # Get the adjusted mouse position relative to the game world
+                            self.camera_offset_x = self.camera.camera.x
+                            self.camera_offset_y = self.camera.camera.y
+                            self.mouse_pos = (event.pos[0] + self.camera_offset_x, event.pos[1] + self.camera_offset_y)
+                            self.bullet = Bullet(self, self.player_posx , self.player_posy, self.mouse_pos[0], self.mouse_pos[1])
+                            print(self.mouse_pos[0])
+                            print(self.mouse_pos[1])
+                            self.all_sprites.add(self.bullet)
+
+
             #     if event.key == pg.K_LEFT:
             #       self.player1.move(dx=-1)
             #   if event.key == pg.K_RIGHT:
@@ -228,7 +253,7 @@ class Game:
             #       self.player1.move(dy=1)
 
     def show_start_screen(self):
-        self.spritesheet = Spritesheet(path.join(img_folder, 'chest.png'))
+        self.spritesheet = Spritesheet(path.join(img_folder, 'boss.png'))
         # self.screen.fill(BLUE)
         self.draw_text(self.screen,"this is the start screen",100 ,WHITE, WIDTH/6, HEIGHT/2-32)
         pg.display.flip()

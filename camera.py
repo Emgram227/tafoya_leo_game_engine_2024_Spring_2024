@@ -106,7 +106,7 @@ class Camera:
     def __init__(self):
         self.camera = pg.Rect(0, 0, WIDTH, HEIGHT)
         self.width = WIDTH
-        self.height = HEIGHT
+        self.height = HEIGHT       
 
     def apply(self, entity):
         return entity.rect.move(self.camera.topleft)
