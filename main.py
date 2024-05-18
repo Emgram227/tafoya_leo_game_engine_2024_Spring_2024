@@ -35,6 +35,7 @@ class Game:
     def __init__(self):
         #initializes the game (pygame)
         pg.init()
+        pg.mixer.init()
         # sets the window (width, height and title)
         self.screen = pg.display.set_mode((WIDTH, HEIGHT))
         pg.display.set_caption(TITLE)
@@ -56,9 +57,14 @@ class Game:
         #         print(line)
         #         self.map_data.append(line)
         self.img_folder = path.join(self.game_folder, 'images')
+        self.snd_folder = path.join(self.game_folder, 'sounds')
         self.player_img = pg.image.load(path.join(self.img_folder, 'theBell.png')).convert_alpha()
     # runs the game
     def new(self):
+        # self.radio1 = pg.mixer.Sound(path.join(self.snd_folder, 'sfx_sounds_powerup16.wav'))
+        # self.radio2 = pg.mixer.Sound(path.join(self.snd_folder, 'SHING.wav'))
+        # self.radio3 = 
+
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
         self.coins = pg.sprite.Group()
@@ -77,6 +83,21 @@ class Game:
         self.mob_timer.cd = 10
         self.magazine = 10
         self.ammo = 50
+        self.sold1 = False
+        self.sold2 = False
+        self.sold3 = False
+        self.sold4 = False
+        self.shop_timer1 = Timer(self)
+        self.shop_timer1.cd = 60
+        self.shop_timer2 = Timer(self)
+        self.shop_timer2.cd = 60
+        self.shop_timer3 = Timer(self)
+        self.shop_timer3.cd = 60
+        self.shop1_message = " 'I need more boolets' "
+        self.shop2_message = "Completely heals you"
+        self.shop3_message = "Brings up speed by tiny amount"
+        self.shop4_message = "Definitely not stolen from Fallout"
+        # self.health_bar = HealthBar(self, self.player1.rect.x, self.player1.rect.y - 20, HEALTH_BAR_WIDTH, HEALTH_BAR_HEIGHT, self.player1, 100)
         for row, tiles in enumerate(self.map.data):
             for col, tile in enumerate(tiles):
                 if tile == '1':
@@ -108,6 +129,8 @@ class Game:
                     Mob2(self,col,row) 
                 if tile == 'N':
                     Boss(self,col,row)
+                if tile == "S":
+                    Shop(self,col,row)
 
     def run(self):
         # creates "while" loop that triggers when running = true
@@ -125,14 +148,37 @@ class Game:
     def update(self): 
         self.random = randint(0,3)
         # self.mouse_pos = pg.mouse.get_pos()
-        self.cooldown.ticking()
-        self.mob_timer.ticking()
+        if paused == False:
+            if self.player1.shop_open == False:
+                self.cooldown.ticking()
+                self.mob_timer.ticking()
+        if self.sold1 == True:
+            self.shop1_message = (str(self.shop_timer1.cd))
+            self.shop_timer1.ticking()
+        if self.sold2 == True:
+            self.shop2_message = (str(self.shop_timer2.cd))
+            self.shop_timer2.ticking()
+        if self.sold3 == True:
+            self.shop3_message = (str(self.shop_timer3.cd))
+            self.shop_timer3.ticking()
+        if self.sold4 == True:
+            self.shop4_message = "Sold Out"
         self.all_sprites.update()
         self.all_sprites.add(self.player1, self.game_object)
         self.game_object.update()
         # self.camera.apply(self.player1)
         self.camera.update(self.player1)
         
+        if self.shop_timer1.cd < 1:
+            self.sold1 = False
+            self.shop1_message = " 'I need more boolets' "
+        if self.shop_timer2.cd < 1:
+            self.sold2 = False
+            self.shop2_message = "Completely heals you"
+        if self.shop_timer3.cd < 1:
+            self.sold3 = False
+            self.shop3_message = "Brings up speed by tiny amount"
+
         if self.mob_timer.cd < 1:
             self.mob_timer.cd = 10
             self.round_number += 1 
@@ -165,6 +211,18 @@ class Game:
         text_rect.topleft = (x,y)
         surface.blit(text_surface,text_rect)
 
+    # def draw_health_bar(self):
+    #     # calculate health ratio
+    #     health_ratio = self.player1.hitpoints / self.player1.maxhitpoints
+    #     # calculate width of health bar
+    #     health_width = int(self.player1.rect.width * health_ratio)
+    #     # create health bar
+    #     health_bar = pg.Rect(0, 0, health_width, 7)
+    #     # position health bar
+    #     health_bar.midtop = self.player1.rect.midtop
+    #     # draw health bar
+    #     pg.draw.rect(self.player1.image, GREEN, health_bar)
+
 
     def draw(self):
             self.screen.fill(BGCOLOR)
@@ -191,6 +249,71 @@ class Game:
                     self.draw_text(self.screen, "Reload", 24, WHITE, WIDTH/2 - 32, 90)
             else:
                 self.draw_text(self.screen, "Out of Ammo", 24, WHITE, WIDTH/2 - 32, 90)
+            # self.draw_health_bar(self.screen, self.player1.rect.x, self.player1.rect.y-8, self.player1.hitpoints)
+            # Modified from ChatGPT
+            if self.player1.shop_open == True:
+
+                # Draw the menu background
+                menu_bg = pg.Surface((600, 600))
+                menu_bg.fill((0, 0, 0))
+                menu_bg.set_alpha(150)  # Transparency
+                self.screen.blit(menu_bg, (100, 150))
+
+                font = pg.font.Font(None, 50)
+                subfont = pg.font.Font(None, 30)
+                text1 = font.render("Game Shop", True, WHITE)
+                self.screen.blit(text1, (100, 100)) 
+                text2 = font.render("Press SPACE to close", True, WHITE)
+                self.screen.blit(text2, (100, 150)) 
+
+                box1 = pg.Surface((500, 100)) # Size
+                box1.fill(YELLOW) # Color
+                box1.set_alpha(150)  # Transparency
+                self.screen.blit(box1, (150, 200)) # Position
+                option1 = font.render("50 Bullets: $20 (Press 1)", True, WHITE)
+                self.screen.blit(option1, (160, 210)) 
+                subtext1 = subfont.render(self.shop1_message, True, WHITE)
+                self.screen.blit(subtext1, (160, 250)) 
+
+                box2 = pg.Surface((500, 100))
+                box2.fill(GREEN)
+                box2.set_alpha(150)
+                self.screen.blit(box2, (150, 320)) 
+                option2 = font.render("Full Heal: $40 (Press 2)", True, WHITE)
+                self.screen.blit(option2, (160, 330)) 
+                subtext2 = subfont.render(self.shop2_message, True, WHITE)
+                self.screen.blit(subtext2, (160, 370)) 
+
+                box3 = pg.Surface((500, 100))
+                box3.fill(RED)
+                box3.set_alpha(150) 
+                self.screen.blit(box3, (150, 440))
+                option3 = font.render("Speed Boost: $60 (Press 3)", True, WHITE)
+                self.screen.blit(option3, (160, 450)) 
+                subtext3 = subfont.render(self.shop3_message, True, WHITE)
+                self.screen.blit(subtext3, (160, 490)) 
+
+                box4 = pg.Surface((500, 100))
+                box4.fill(BLUE)
+                box4.set_alpha(150)
+                self.screen.blit(box4, (150, 560))
+                option4 = font.render("Radio: $80 (Press 4)", True, WHITE)
+                self.screen.blit(option4, (160, 570))
+                subtext3 = subfont.render(self.shop4_message, True, WHITE)
+                self.screen.blit(subtext3, (160, 610)) 
+                
+            if paused == True:
+                # Modified Shop Menu
+                menu_bg = pg.Surface((WIDTH, HEIGHT))
+                menu_bg.fill((0, 0, 0))
+                menu_bg.set_alpha(150)  # Transparency
+                self.screen.blit(menu_bg, (0,0))
+
+                font = pg.font.Font(None, 50)
+                text = font.render("Paused (Press any Key)", True, WHITE)
+                self.screen.blit(text, (100, 150)) 
+            else:
+                pass
             pg.display.flip()
     
 
@@ -211,12 +334,60 @@ class Game:
                     if self.ammo > 0:
                         self.magazine = 10
                         self.ammo -= 10
+                        print(self.magazine)
+                        print(self.ammo)
                     # self.player1.weapon = True
                     # print("Weapon Equiped")
                 if event.key == pg.K_ESCAPE:
                     self.quit()
                 # if event.key == pg.K_SPACE:
                 #     self.game_object.following = not self.game_object.following
+                if event.key == pg.K_p:
+                        global paused
+                        paused = True
+                        self.player1.paused = True
+                else:
+                    paused = False
+                    self.player1.paused = False
+                if event.key == pg.K_1:
+                    if self.player1.shop_open == True:
+                        if self.sold1 == False:
+                            if self.player1.moneybag >= 20:
+                                self.player1.moneybag -= 20
+                                self.sold1 = True
+                                self.ammo += 50
+                                print("SOLD")
+                            else:
+                                print("Not Enough Money")
+                if event.key == pg.K_2:
+                    if self.player1.shop_open == True:
+                        if self.sold2 == False:
+                            if self.player1.moneybag >= 40:
+                                self.player1.moneybag -= 40
+                                self.sold2 = True
+                                self.player1.hitpoints = 100
+                                print("SOLD")
+                            else:
+                                print("Not Enough Money")
+                if event.key == pg.K_3:
+                    if self.player1.shop_open == True:
+                        if self.sold3 == False:
+                            if self.player1.moneybag >= 60:
+                                self.player1.moneybag -= 60
+                                self.player1.speed += 50
+                                self.sold3 = True
+                                print("SOLD")
+                            else:
+                                print("Not Enough Money")
+                if event.key == pg.K_4:
+                    if self.player1.shop_open == True:
+                        if self.sold4 == False:
+                            if self.player1.moneybag >= 80:
+                                self.player1.moneybag -= 80
+                                self.sold4 = True
+                                print("SOLD")
+                            else:
+                                print("Not Enough Money")
             elif event.type == pg.MOUSEBUTTONDOWN:
                      if event.button == 1:  # Left mouse button
                         if self.magazine > 0:

@@ -42,3 +42,10 @@ powerUp = False
 
 global hiding
 hiding = False
+
+global paused
+paused = False
+
+
+HEALTH_BAR_WIDTH = 100
+HEALTH_BAR_HEIGHT = 7

@@ -36,7 +36,10 @@ class Player(pg.sprite.Sprite):
         self.test = True
         self.weapon = False
         self.holding_object = False
+        self.max_hitpoints = 100
         self.get_mouse()
+        self.shop_open = False
+        self.paused = False
     
     def get_mouse(self):
         if pg.mouse.get_pressed()[0]:
@@ -50,17 +53,26 @@ class Player(pg.sprite.Sprite):
     def get_keys(self):
         self.vx, self.vy = 0, 0
         keys = pg.key.get_pressed()
-        if keys[pg.K_LEFT] or keys[pg.K_a]:
-            self.vx = -self.speed
-        if keys[pg.K_RIGHT] or keys[pg.K_d]:
-            self.vx = self.speed
-        if keys[pg.K_UP] or keys[pg.K_w]:
-            self.vy = -self.speed
-        if keys[pg.K_DOWN] or keys[pg.K_s]:
-            self.vy = self.speed
-        if self.vx != 0 and self.vy != 0:
-            self.vx *= 0.7071
-            self.vy *= 0.7071
+        if keys[pg.K_SPACE]:
+            self.shop_open = False
+            global hiding
+            hiding = False 
+        if keys[pg.K_p]:
+            hiding = True
+        if self.paused == False: 
+            hiding = False
+            if self.shop_open == False:
+                if keys[pg.K_LEFT] or keys[pg.K_a]:
+                    self.vx = -self.speed
+                if keys[pg.K_RIGHT] or keys[pg.K_d]:
+                    self.vx = self.speed
+                if keys[pg.K_UP] or keys[pg.K_w]:
+                    self.vy = -self.speed
+                if keys[pg.K_DOWN] or keys[pg.K_s]:
+                    self.vy = self.speed
+                if self.vx != 0 and self.vy != 0:
+                    self.vx *= 0.7071
+                    self.vy *= 0.7071
     
     # def move(self,dx=0,dy=0):
     #     self.x += dx
@@ -142,6 +154,12 @@ class Player(pg.sprite.Sprite):
                         self.hitpoints += 1
                         self.moneybag += 1
                         kill
+            if str(hits[0].__class__.__name__) == "Shop":
+                self.shop_open = True
+                hiding = True
+                self.paused = True
+
+                        
 
     def animate(self):
         now = pg.time.get_ticks()
@@ -152,9 +170,29 @@ class Player(pg.sprite.Sprite):
             self.image = self.standing_frames[self.current_frame]
             self.rect = self.image.get_rect()
             self.rect.bottom = bottom
+            
+    # def draw_health(self):
+    #     if self.hitpoints > 100:
+    #         color = GREEN
+    #     else: 
+    #         if self.hitpoints > 50:
+    #             color = GREEN
+    #         else:
+    #             if self.hitpoints > 20:
+    #                 color = YELLOW
+    #             else:
+    #                 if self.hitpoints > 0:
+    #                     color = RED
+    #     width = int(self.rect.width * self.hitpoints / self.max_hitpoints)
+    #     self.health_bar = pg.Rect(0, 0, width, 7)
+    #     # if self.hitpoints < self.max_hitpoints:
+    #     pg.draw.rect(self.image, color, self.health_bar)
 
+
+    
 
     def update(self):
+        # self.draw_health()
         self.animate()
         self.rect.x = self.x
         self.rect.y = self.y
@@ -388,7 +426,8 @@ class Mob(pg.sprite.Sprite):
         self.spritesheet = Spritesheet(path.join(img_folder, 'zombie.png'))
         self.load_images()
         self.image = self.standing_frames[0]
-        
+        self.health = 10
+        self.max_health = 10
         self.rect = self.image.get_rect()
         self.x = x
         self.y = y
@@ -420,9 +459,12 @@ class Mob(pg.sprite.Sprite):
                    self.y= hits[0].rect.bottom
                self.vy = 0
                self.rect.y= self.y
+            
    
     def update(self):
             # self.rect.x += 1
+            if self.health < 1:
+                self.kill()
             if hiding == False:
                 self.x += self.vx * self.game.dt
                 self.y += self.vy * self.game.dt
@@ -443,6 +485,7 @@ class Mob(pg.sprite.Sprite):
                 self.collide_with_walls('x')
                 self.rect.y = self.y
                 self.collide_with_walls('y')
+
 
 class MobSpawner(pg.sprite.Sprite):
     def __init__ (self,game,x,y):
@@ -480,10 +523,11 @@ class Mob2(pg.sprite.Sprite):
         self.vel = vec(0, 0)
         self.acc = vec(0, 0)
         self.rot = 0
+        self.health = 10
+        self.max_health = 10
         self.chase_distance = 500
         self.speed = 300
         self.hiding = hiding 
-        #self.hitpoints = 100
     # def sensor(self):
     #     if self.hiding == True:
     #         self.chasing = False
@@ -496,9 +540,9 @@ class Mob2(pg.sprite.Sprite):
 
     
     def update(self):
-        #if self.hitpoints <= 0:
-            #self.kill()
         # self.sensor()
+        if self.health < 1:
+            self.kill()
         if hiding == False:
             self.rot = (self.game.player1.rect.center - self.pos).angle_to(vec(1, 0))
             self.rect = self.image.get_rect()
@@ -515,6 +559,7 @@ class Mob2(pg.sprite.Sprite):
             collide_with_walls(self, self.game.walls, 'y')
             self.rect.center = self.hit_rect.center
 
+    
 class Ghost(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.mobs
@@ -536,6 +581,8 @@ class Ghost(pg.sprite.Sprite):
         # added
         self.speed = 300
         self.chasing = True
+        self.health = 10
+        self.max_health = 10
       
         #self.hitpoints = 100
     def load_images(self):
@@ -547,6 +594,7 @@ class Ghost(pg.sprite.Sprite):
         else:
             self.chasing = False
     
+
     def update(self):
         #if self.hitpoints <= 0:
             #self.kill()
@@ -568,23 +616,23 @@ class Ghost(pg.sprite.Sprite):
                 collide_with_walls(self, self.game.walls, 'y')
                 # self.rect.center = self.hit_rect.center
 
-# class HealthBar(pg.sprite.Sprite):
-#     def __init__(self, game, x, y, w, h, target, pct):
-#         self.groups = game.all_sprites
-#         pg.sprite.Sprite.__init__(self, self.groups)
-#         self.game = game
-#         self.w = w
-#         self.h = h
-#         self.image = pg.Surface((w, h))
-#         self.rect = self.image.get_rect()
-#         self.image.fill(GREEN)
-#         self.rect.x = x
-#         self.rect.y = y
-#         self.target = target
-#         self.pct = pct
-#     def update(self):
-#         self.rect.x = self.target.rect.x
-#         self.rect.y = self.target.rect.y
+class HealthBar(pg.sprite.Sprite):
+    def __init__(self, game, x, y, w, h, target, pct):
+        self.groups = game.all_sprites
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.w = w
+        self.h = h
+        self.image = pg.Surface((w, h))
+        self.rect = self.image.get_rect()
+        self.image.fill(GREEN)
+        self.rect.x = x
+        self.rect.y = y
+        self.target = target
+        self.pct = pct
+    def update(self):
+        self.rect.x = self.target.rect.x
+        self.rect.y = self.target.rect.y
 
 #ChatGPT
 # class GameObject(pg.sprite.Sprite):
@@ -688,14 +736,17 @@ class Bullet(pg.sprite.Sprite):
                     print ("shot")
                     kill
                     self.kill()
+
             if str(hits[0].__class__.__name__) == "Mob":
                     print ("shot")
                     kill
                     self.kill()
+
             if str(hits[0].__class__.__name__) == "Ghost":
                     print ("shot")
                     kill
                     self.kill()
+
     # def collide_with_walls(self, dir):
     #     if dir == 'x':
     #        hits = pg.sprite.spritecollide(self, self.game.walls, False)
@@ -716,4 +767,20 @@ class Bullet(pg.sprite.Sprite):
     #            self.vy = 0
     #            self.rect.y= self.y
     
-      
+class Shop(pg.sprite.Sprite):
+    def __init__ (self,game,x,y):
+        self.groups = game.all_sprites, game.walkthroughs
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE,TILESIZE))
+        self.spritesheet = Spritesheet(path.join(img_folder, 'shop.png'))
+        self.load_images()
+        self.image = self.standing_frames[0]
+        self.rect = self.image.get_rect()
+        self.x = x
+        self.y = y 
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
+    def load_images(self):
+        self.standing_frames = [self.spritesheet.get_image(0,0, 96, 64), 
+                                self.spritesheet.get_image(64,0, 96, 64)]
