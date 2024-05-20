@@ -27,7 +27,7 @@ class Player(pg.sprite.Sprite):
         self.doorkey = doorKey
         self.powerup = powerUp
         self.hiding = hiding
-        self.moneybag = 0
+        self.moneybag = 100
         self.speed = 300
         self.hitpoints = 100
         self.cooldown = Timer(self)
@@ -40,6 +40,7 @@ class Player(pg.sprite.Sprite):
         self.get_mouse()
         self.shop_open = False
         self.paused = False
+        self.npctalk = False
     
     def get_mouse(self):
         if pg.mouse.get_pressed()[0]:
@@ -57,7 +58,15 @@ class Player(pg.sprite.Sprite):
             self.shop_open = False
             global hiding
             hiding = False 
+            if self.npctalk == True:
+                global npctalk
+                npctalk = True
+            else:
+                npctalk = False
+
         if keys[pg.K_p]:
+            hiding = True
+        if keys[pg.K_e]:
             hiding = True
         if self.paused == False: 
             hiding = False
@@ -158,6 +167,10 @@ class Player(pg.sprite.Sprite):
                 self.shop_open = True
                 hiding = True
                 self.paused = True
+            
+            if str(hits[0].__class__.__name__) == "Npc":
+                self.npctalk =  True
+            
 
                         
 
@@ -654,7 +667,7 @@ class HealthBar(pg.sprite.Sprite):
 
 class Boss(pg.sprite.Sprite):
     def __init__(self, game, x, y):
-        self.groups = game.all_sprites, game.mobs
+        self.groups = game.all_sprites, game.bosses
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.image = pg.Surface((40,50))
@@ -670,12 +683,7 @@ class Boss(pg.sprite.Sprite):
         self.rot = 0
         self.chase_distance = 500
         self.speed = 300
-        #self.hitpoints = 100
-    # def sensor(self):
-    #     if self.hiding == True:
-    #         self.chasing = False
-    #     else:
-    #          self.chasing = True
+        self.hitpoints = 100
 
     def load_images(self):
         self.standing_frames = [self.spritesheet.get_image(0,0, 48, 66), 
@@ -683,9 +691,8 @@ class Boss(pg.sprite.Sprite):
 
     
     def update(self):
-        #if self.hitpoints <= 0:
-            #self.kill()
-        # self.sensor()
+        if self.hitpoints <= 0:
+            self.kill()
         if hiding == False:
             self.rot = (self.game.player1.rect.center - self.pos).angle_to(vec(1, 0))
             self.rect = self.image.get_rect()
@@ -701,7 +708,11 @@ class Boss(pg.sprite.Sprite):
             self.hit_rect.centery = self.pos.y
             collide_with_walls(self, self.game.walls, 'y')
             self.rect.center = self.hit_rect.center
-
+    def collide_with_group(self,group,kill):
+        hits = pg.sprite.spritecollide(self, group, kill)
+        if hits:
+            if str(hits[0].__class__.__name__) == "Bullet":
+                self.hitpoints -= 1
 
 
 #Modified from ChatGPT
@@ -721,6 +732,7 @@ class Bullet(pg.sprite.Sprite):
 
     def update(self):
         self.collide_with_group(self.game.mobs, True)
+        self.collide_with_group(self.game.bosses, True)
         # self.collide_with_walls('x')
         # self.collide_with_walls('y')
         self.rect.x += self.dx
@@ -745,6 +757,9 @@ class Bullet(pg.sprite.Sprite):
             if str(hits[0].__class__.__name__) == "Ghost":
                     print ("shot")
                     kill
+                    self.kill()
+            if str(hits[0].__class__.__name__) == "Boss":
+                    print ("shot")
                     self.kill()
 
     # def collide_with_walls(self, dir):
@@ -784,3 +799,21 @@ class Shop(pg.sprite.Sprite):
     def load_images(self):
         self.standing_frames = [self.spritesheet.get_image(0,0, 96, 64), 
                                 self.spritesheet.get_image(64,0, 96, 64)]
+
+class Npc(pg.sprite.Sprite):
+    def __init__ (self,game,x,y):
+        self.groups = game.all_sprites, game.walkthroughs
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE,TILESIZE))
+        self.spritesheet = Spritesheet(path.join(img_folder, 'bush.png'))
+        self.load_images()
+        self.image = self.standing_frames[0]
+        self.rect = self.image.get_rect()
+        self.x = x
+        self.y = y 
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
+    def load_images(self):
+        self.standing_frames = [self.spritesheet.get_image(0,0, 32, 32), 
+                                self.spritesheet.get_image(32,0, 32, 32)]

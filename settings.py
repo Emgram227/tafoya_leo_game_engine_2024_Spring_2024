@@ -46,6 +46,12 @@ hiding = False
 global paused
 paused = False
 
+global npctalk
+npctalk = False
+
+global showinventory
+showinventory = False
+
 
 HEALTH_BAR_WIDTH = 100
 HEALTH_BAR_HEIGHT = 7

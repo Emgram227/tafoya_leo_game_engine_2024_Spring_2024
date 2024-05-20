@@ -61,10 +61,11 @@ class Game:
         self.player_img = pg.image.load(path.join(self.img_folder, 'theBell.png')).convert_alpha()
     # runs the game
     def new(self):
-        # self.radio1 = pg.mixer.Sound(path.join(self.snd_folder, 'sfx_sounds_powerup16.wav'))
-        # self.radio2 = pg.mixer.Sound(path.join(self.snd_folder, 'SHING.wav'))
-        # self.radio3 = 
-
+        # self.radio1 = pg.mixer.Sound(path.join(self.snd_folder, '.wav'))
+        # self.radio2 = pg.mixer.Sound(path.join(self.snd_folder, '.wav'))
+        # self.radio3 = pg.mixer.Sound(path.join(self.snd_folder,'.wav'))
+        # self.radio4 = pg.mixer.Sound(path.join(self.snd_folder, '.wav'))
+        self.radio_name = "Nothing"
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
         self.coins = pg.sprite.Group()
@@ -75,7 +76,9 @@ class Game:
         self.keys = pg.sprite.Group()
         self.chests = pg.sprite.Group()
         self.mobs = pg.sprite.Group()
+        self.bosses = pg.sprite.Group()
         self.mobspawner = pg.sprite.Group()
+        self.bullets = pg.sprite.Group()
         self.mob_timer = Timer(self)
         self.cooldown = Timer(self)
         self.camera = Camera()
@@ -97,6 +100,7 @@ class Game:
         self.shop2_message = "Completely heals you"
         self.shop3_message = "Brings up speed by tiny amount"
         self.shop4_message = "Definitely not stolen from Fallout"
+        self.play_radio = False
         # self.health_bar = HealthBar(self, self.player1.rect.x, self.player1.rect.y - 20, HEALTH_BAR_WIDTH, HEALTH_BAR_HEIGHT, self.player1, 100)
         for row, tiles in enumerate(self.map.data):
             for col, tile in enumerate(tiles):
@@ -127,10 +131,12 @@ class Game:
                     # if not self.cooling:
                     #        print ("Working")
                     Mob2(self,col,row) 
-                if tile == 'N':
+                if tile == 'G':
                     Boss(self,col,row)
                 if tile == "S":
                     Shop(self,col,row)
+                if tile == "N":
+                    Npc(self,col,row)
 
     def run(self):
         # creates "while" loop that triggers when running = true
@@ -166,7 +172,6 @@ class Game:
         self.all_sprites.update()
         self.all_sprites.add(self.player1, self.game_object)
         self.game_object.update()
-        # self.camera.apply(self.player1)
         self.camera.update(self.player1)
         
         if self.shop_timer1.cd < 1:
@@ -312,8 +317,45 @@ class Game:
                 font = pg.font.Font(None, 50)
                 text = font.render("Paused (Press any Key)", True, WHITE)
                 self.screen.blit(text, (100, 150)) 
-            else:
-                pass
+
+            if self.play_radio == True:
+                menu_bg = pg.Surface((300, 50))
+                menu_bg.fill((0, 0, 0))
+                menu_bg.set_alpha(150)  # Transparency
+                self.screen.blit(menu_bg, (750, 10))
+                
+                font = pg.font.Font(None, 30)
+                text = font.render("Now Playing:", True, WHITE)
+                self.screen.blit(text, (750, 15)) 
+                text = font.render(self.radio_name, True, WHITE)
+                self.screen.blit(text, (885, 15)) 
+            
+            if showinventory == True:
+                menu_bg = pg.Surface((WIDTH, HEIGHT))
+                menu_bg.fill((0, 0, 0))
+                menu_bg.set_alpha(150)  # Transparency
+                self.screen.blit(menu_bg, (0,0))
+                
+                font = pg.font.Font(None, 50)
+                text1 = font.render("Inventory:", True, WHITE)
+                self.screen.blit(text1, (100, 100)) 
+                text2 = font.render(str(self.ammo), True, WHITE)
+                self.screen.blit(text2, (230, 150)) 
+                text3 = font.render("Ammo:", True, WHITE)
+                self.screen.blit(text3, (100, 150)) 
+                text4 = font.render(str(self.player1.moneybag), True, WHITE)
+                self.screen.blit(text4, (230, 200)) 
+                text5 = font.render("Money:", True, WHITE)
+                self.screen.blit(text5, (100, 200)) 
+                text6 = font.render(str(self.play_radio), True, WHITE)
+                self.screen.blit(text6, (230, 250)) 
+                text7 = font.render("Radio:", True, WHITE)
+                self.screen.blit(text7, (100, 250)) 
+                
+
+
+
+
             pg.display.flip()
     
 
@@ -321,7 +363,7 @@ class Game:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 self.quit()
-            if self.player1.hitpoints < 0:
+            if self.player1.hitpoints <= 0:
                 self.quit()
             if event.type == pg.KEYDOWN:
                 # if event.key == pg.K_r:
@@ -359,6 +401,9 @@ class Game:
                                 print("SOLD")
                             else:
                                 print("Not Enough Money")
+                    else:
+                        if self.play_radio == True:
+                            self.radio_name = "Doom Music"
                 if event.key == pg.K_2:
                     if self.player1.shop_open == True:
                         if self.sold2 == False:
@@ -369,6 +414,9 @@ class Game:
                                 print("SOLD")
                             else:
                                 print("Not Enough Money")
+                    else:
+                        if self.play_radio == True:
+                            self.radio_name = "Portal Music"
                 if event.key == pg.K_3:
                     if self.player1.shop_open == True:
                         if self.sold3 == False:
@@ -379,15 +427,32 @@ class Game:
                                 print("SOLD")
                             else:
                                 print("Not Enough Money")
+                    else:
+                        if self.play_radio == True:
+                            self.radio_name = "Mario Music"
                 if event.key == pg.K_4:
                     if self.player1.shop_open == True:
                         if self.sold4 == False:
                             if self.player1.moneybag >= 80:
                                 self.player1.moneybag -= 80
                                 self.sold4 = True
+                                self.play_radio = True
                                 print("SOLD")
                             else:
                                 print("Not Enough Money")
+                    else:
+                        if self.play_radio == True:
+                            self.radio_name = "Game Music"
+                if event.key == pg.K_5:
+                    if self.play_radio == True:
+                        self.radio_name = "Nothing"
+                if event.key == pg.K_e:
+                    global showinventory
+                    showinventory = True
+                    self.player1.paused = True
+                else:
+                    showinventory = False
+                    
             elif event.type == pg.MOUSEBUTTONDOWN:
                      if event.button == 1:  # Left mouse button
                         if self.magazine > 0:
